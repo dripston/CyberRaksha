@@ -1,10 +1,18 @@
-import { User } from "@shared/schema";
+import { Profile } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 
 interface HeaderProps {
-  user: User;
+  profile: Profile;
 }
 
-export default function Header({ user }: HeaderProps) {
+export default function Header({ profile }: HeaderProps) {
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    window.location.href = "/";
+  };
+
   return (
     <header className="bg-cyber-dark border-b border-cyber-light sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -37,19 +45,20 @@ export default function Header({ user }: HeaderProps) {
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gradient-to-br from-cyber-neon to-cyber-accent rounded-lg flex items-center justify-center">
-                <span className="text-sm font-bold text-cyber-bg">{user?.level || 1}</span>
+                <span className="text-sm font-bold text-cyber-bg">{profile?.level || 1}</span>
               </div>
               <span className="font-mono text-sm text-cyber-accent font-semibold">
-                Level {user?.level || 1}
+                Level {profile?.level || 1}
               </span>
             </div>
-            <a 
-              href="/api/logout"
+            <button 
+              onClick={handleLogout}
               className="w-10 h-10 bg-cyber-light rounded-lg border border-cyber-muted hover:border-cyber-primary transition-colors flex items-center justify-center"
               data-testid="button-logout"
+              title="Logout"
             >
-              <span className="text-sm">👤</span>
-            </a>
+              <span className="text-sm">🚪</span>
+            </button>
           </div>
         </div>
       </div>

@@ -1,27 +1,11 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertCourseSchema, insertUserProgressSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
-
   // Initialize default data
   await initializeDefaultData();
-
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
 
   // Course routes
   app.get('/api/courses', async (req, res) => {
@@ -47,36 +31,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User progress routes
-  app.get('/api/user/progress', isAuthenticated, async (req: any, res) => {
+  // User progress routes (using profile ID from query params)
+  app.get('/api/user/progress', async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const progress = await storage.getUserProgress(userId);
-      res.json(progress);
+      const profileId = req.query.profileId as string;
+      if (!profileId) {
+        return res.status(400).json({ message: "Profile ID is required" });
+      }
+      
+      // For now, return empty progress since we're using client-side profiles
+      res.json([]);
     } catch (error) {
       console.error("Error fetching user progress:", error);
       res.status(500).json({ message: "Failed to fetch user progress" });
     }
   });
 
-  app.post('/api/user/progress/:courseId', isAuthenticated, async (req: any, res) => {
+  app.post('/api/user/progress/:courseId', async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
       const { courseId } = req.params;
-      const progressData = insertUserProgressSchema.parse(req.body);
+      const { profileId, progressData } = req.body;
       
-      const progress = await storage.updateUserProgress(userId, courseId, progressData);
-      
-      // Award XP for progress
-      if (progressData.completedLessons) {
-        const course = await storage.getCourse(courseId);
-        if (course && course.xpPerLesson) {
-          const xpGain = course.xpPerLesson * progressData.completedLessons;
-          await storage.updateUserStats(userId, xpGain);
-        }
+      if (!profileId) {
+        return res.status(400).json({ message: "Profile ID is required" });
       }
-      
-      res.json(progress);
+
+      // For now, return success since we're using client-side profiles
+      res.json({ 
+        courseId, 
+        profileId, 
+        completedLessons: progressData?.completedLessons || 0,
+        isCompleted: progressData?.isCompleted || false
+      });
     } catch (error) {
       console.error("Error updating user progress:", error);
       res.status(500).json({ message: "Failed to update user progress" });
@@ -94,11 +80,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/user/badges', isAuthenticated, async (req: any, res) => {
+  app.get('/api/user/badges', async (req, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const userBadges = await storage.getUserBadges(userId);
-      res.json(userBadges);
+      const profileId = req.query.profileId as string;
+      if (!profileId) {
+        return res.status(400).json({ message: "Profile ID is required" });
+      }
+      
+      // For now, return empty badges since we're using client-side profiles
+      res.json([]);
     } catch (error) {
       console.error("Error fetching user badges:", error);
       res.status(500).json({ message: "Failed to fetch user badges" });
@@ -109,8 +99,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/leaderboard', async (req, res) => {
     try {
       const limit = parseInt(req.query.limit as string) || 10;
-      const leaderboard = await storage.getLeaderboard(limit);
-      res.json(leaderboard);
+      // For now, return empty leaderboard since we're using client-side profiles
+      res.json([]);
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
       res.status(500).json({ message: "Failed to fetch leaderboard" });

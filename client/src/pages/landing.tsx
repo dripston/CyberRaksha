@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
+import AuthModal from "@/components/AuthModal";
 
 export default function Landing() {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-cyber-bg text-cyber-text flex flex-col">
       {/* Header */}
@@ -47,13 +51,13 @@ export default function Landing() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
             >
-              <a
-                href="/api/login"
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
                 className="modern-button inline-block px-10 py-4 text-lg font-mono rounded-xl font-semibold"
                 data-testid="button-login"
               >
                 Start Your Journey
-              </a>
+              </button>
             </motion.div>
 
             <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-10">
@@ -112,6 +116,13 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      {/* Authentication Modal */}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+        initialMode="signup"
+      />
     </div>
   );
 }

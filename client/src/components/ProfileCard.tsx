@@ -1,16 +1,24 @@
-import { User } from "@shared/schema";
+import { Profile } from "@/hooks/useAuth";
 import BadgeDisplay from "./BadgeDisplay";
 
 interface ProfileCardProps {
-  user: User;
+  profile: Profile;
   userBadges: any[];
 }
 
-export default function ProfileCard({ user, userBadges }: ProfileCardProps) {
-  const displayName = user.firstName || user.email?.split('@')[0] || 'Player';
-  const initials = user.firstName 
-    ? `${user.firstName[0]}${user.lastName?.[0] || ''}` 
-    : displayName.slice(0, 2).toUpperCase();
+export default function ProfileCard({ profile, userBadges }: ProfileCardProps) {
+  // Get avatar emoji based on avatar ID
+  const getAvatarEmoji = (avatarId: string) => {
+    const avatarMap: Record<string, string> = {
+      "avatar1": "🛡️",
+      "avatar2": "🔒", 
+      "avatar3": "🚀",
+      "avatar4": "💻",
+      "avatar5": "🔐",
+      "avatar6": "💡"
+    };
+    return avatarMap[avatarId] || "👤";
+  };
 
   return (
     <>
@@ -18,33 +26,26 @@ export default function ProfileCard({ user, userBadges }: ProfileCardProps) {
         <div className="text-center">
           {/* Avatar */}
           <div className="w-24 h-24 mx-auto mb-4 relative">
-            {user.profileImageUrl ? (
-              <img 
-                src={user.profileImageUrl} 
-                alt="Profile"
-                className="w-full h-full rounded-lg pixel-border object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-cyber-primary to-cyber-pink rounded-lg border-2 border-cyber-accent flex items-center justify-center">
-                <span className="font-mono text-lg text-cyber-bg font-bold">{initials}</span>
-              </div>
-            )}
+            <div className="w-full h-full bg-gradient-to-br from-cyber-primary to-cyber-pink rounded-lg border-2 border-cyber-accent flex items-center justify-center">
+              <span className="text-4xl">{getAvatarEmoji(profile.avatar)}</span>
+            </div>
             <div className="level-indicator absolute -bottom-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center">
-              <span className="font-pixel text-xs text-cyber-bg">{user.level || 1}</span>
+              <span className="font-mono text-xs text-cyber-bg">{profile.level}</span>
             </div>
           </div>
           
           <h2 className="font-mono text-xl text-cyber-secondary mb-3 font-bold" data-testid="text-username">
-            {displayName}
+            {profile.username}
           </h2>
-          <div className="text-base text-cyber-accent mb-6 font-medium">{user.rank || 'Bronze'} Cyber Guardian</div>
+          <div className="text-base text-cyber-accent mb-2 font-medium">{profile.profession}</div>
+          <div className="text-base text-cyber-accent mb-6 font-medium">{profile.rank} Cyber Guardian</div>
           
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-4 mb-8">
             <div className="bg-cyber-bg rounded-lg p-4 border border-cyber-light">
               <div className="font-mono text-sm text-cyber-neon mb-2 font-medium">XP</div>
               <div className="text-2xl font-bold text-cyber-secondary" data-testid="text-xp">
-                {user.xp || 0}
+                {profile.xp}
               </div>
             </div>
             <div className="bg-cyber-bg rounded-lg p-4 border border-cyber-light">
@@ -56,14 +57,14 @@ export default function ProfileCard({ user, userBadges }: ProfileCardProps) {
             <div className="bg-cyber-bg rounded-lg p-4 border border-cyber-light">
               <div className="font-mono text-sm text-cyber-orange mb-2 font-medium">Streak</div>
               <div className="text-2xl font-bold text-cyber-secondary flex items-center" data-testid="text-streak">
-                <span>{user.streak || 0}</span>
+                <span>{profile.streak}</span>
                 <span className="text-orange-500 ml-2">🔥</span>
               </div>
             </div>
             <div className="bg-cyber-bg rounded-lg p-4 border border-cyber-light">
               <div className="font-mono text-sm text-cyber-pink mb-2 font-medium">Rank</div>
               <div className="text-lg font-bold text-cyber-secondary" data-testid="text-rank">
-                {user.rank || 'Bronze'}
+                {profile.rank}
               </div>
             </div>
           </div>
