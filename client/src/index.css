@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(210 25% 7.8431%);
+  --card: hsl(180 6.6667% 97.0588%);
+  --card-foreground: hsl(210 25% 7.8431%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(210 25% 7.8431%);
+  --primary: hsl(203.8863 88.2845% 53.1373%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(210 25% 7.8431%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --muted: hsl(240 1.9608% 90%);
+  --muted-foreground: hsl(210 25% 7.8431%);
+  --accent: hsl(211.5789 51.3514% 92.7451%);
+  --accent-foreground: hsl(203.8863 88.2845% 53.1373%);
+  --destructive: hsl(356.3033 90.5579% 54.3137%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(201.4286 30.4348% 90.9804%);
+  --input: hsl(200 23.0769% 97.4510%);
+  --ring: hsl(202.8169 89.1213% 53.1373%);
+
+  /* Cyber theme colors */
+  --cyber-bg: hsl(216 15% 6%);
+  --cyber-dark: hsl(220 16% 10%);
+  --cyber-light: hsl(217 13% 17%);
+  --cyber-yellow: hsl(51 100% 50%);
+  --cyber-green: hsl(80 100% 50%);
+  --cyber-blue: hsl(195 100% 50%);
+  --cyber-red: hsl(16 100% 50%);
+  --cyber-text: hsl(213 31% 96%);
+  --cyber-muted: hsl(218 11% 65%);
+
+  --font-pixel: "Press Start 2P", cursive;
+  --font-inter: "Inter", sans-serif;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(216 15% 6%);
+  --foreground: hsl(213 31% 96%);
+  --card: hsl(220 16% 10%);
+  --card-foreground: hsl(213 31% 96%);
+  --popover: hsl(216 15% 6%);
+  --popover-foreground: hsl(213 31% 96%);
+  --primary: hsl(51 100% 50%);
+  --primary-foreground: hsl(216 15% 6%);
+  --secondary: hsl(217 13% 17%);
+  --secondary-foreground: hsl(213 31% 96%);
+  --muted: hsl(217 13% 17%);
+  --muted-foreground: hsl(218 11% 65%);
+  --accent: hsl(217 13% 17%);
+  --accent-foreground: hsl(213 31% 96%);
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(210 40% 98%);
+  --border: hsl(217 13% 17%);
+  --input: hsl(217 13% 17%);
+  --ring: hsl(51 100% 50%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-inter antialiased bg-cyber-bg text-cyber-text;
+    font-family: var(--font-inter);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .pixel-border {
+    border: 3px solid;
+    border-image: linear-gradient(45deg, var(--cyber-yellow), var(--cyber-green)) 1;
+  }
+  
+  .retro-card {
+    background: linear-gradient(135deg, var(--cyber-dark) 0%, var(--cyber-light) 100%);
+    border: 2px solid hsl(217 13% 17%);
+    transition: all 0.3s ease;
+  }
+  
+  .retro-card:hover {
+    border-color: var(--cyber-green);
+    box-shadow: 0 0 20px hsl(80 100% 50% / 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .progress-bar {
+    background: linear-gradient(90deg, var(--cyber-green) 0%, var(--cyber-yellow) 100%);
+    height: 8px;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+    animation: shine 2s infinite;
+  }
+  
+  .badge-glow {
+    filter: drop-shadow(0 0 8px hsl(51 100% 50% / 0.6));
+  }
+  
+  .pixel-button {
+    background: linear-gradient(45deg, var(--cyber-yellow), var(--cyber-green));
+    border: none;
+    color: var(--cyber-bg);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.3);
+    font-family: var(--font-pixel);
+  }
+  
+  .pixel-button:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+  }
+  
+  .level-indicator {
+    background: radial-gradient(circle, var(--cyber-yellow), hsl(39 100% 50%));
+    border: 3px solid #fff;
+    box-shadow: 0 0 15px hsl(51 100% 50% / 0.5);
+  }
+
+  .font-pixel {
+    font-family: var(--font-pixel);
+  }
+
+  .font-inter {
+    font-family: var(--font-inter);
+  }
+}
+
+@layer utilities {
+  .animate-pulse-slow {
+    animation: pulse 3s infinite;
+  }
+  
+  .animate-bounce-slow {
+    animation: bounce 2s infinite;
+  }
+
+  @keyframes shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+}
