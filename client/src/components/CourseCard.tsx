@@ -1,9 +1,11 @@
 import { Course } from "@shared/schema";
 import ProgressBar from "./ProgressBar";
+import { useLocation } from "wouter";
 
 interface CourseCardProps {
   course: Course;
   progress: number;
+  onProgressUpdate?: () => void;
 }
 
 const difficultyColors = {
@@ -18,9 +20,14 @@ const difficultyGradients = {
   Advanced: "from-cyber-pink to-cyber-primary",
 };
 
-export default function CourseCard({ course, progress }: CourseCardProps) {
+export default function CourseCard({ course, progress, onProgressUpdate }: CourseCardProps) {
+  const [, setLocation] = useLocation();
   const gradientClass = difficultyGradients[course.difficulty as keyof typeof difficultyGradients] || "from-cyber-blue to-cyber-green";
   const colorClass = difficultyColors[course.difficulty as keyof typeof difficultyColors] || "cyber-green";
+
+  const handleStartCourse = () => {
+    setLocation(`/course/${course.id}/lesson-1`);
+  };
 
   return (
     <div className="cyber-card overflow-hidden" data-testid={`card-course-${course.id}`}>
@@ -47,6 +54,7 @@ export default function CourseCard({ course, progress }: CourseCardProps) {
         <div className="flex justify-between items-center">
           <span className="text-sm text-cyber-accent font-medium">+{course.xpPerLesson} XP per lesson</span>
           <button 
+            onClick={handleStartCourse}
             className="modern-button px-4 py-2 rounded-lg font-mono text-sm"
             data-testid={`button-course-${progress > 0 ? 'continue' : 'start'}-${course.id}`}
           >
