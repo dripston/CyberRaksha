@@ -4,14 +4,14 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-cyber-bg text-cyber-text flex flex-col">
       {/* Header */}
-      <header className="bg-cyber-dark border-b-2 border-cyber-light">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-cyber-yellow to-cyber-green rounded pixel-border flex items-center justify-center">
-                <span className="font-pixel text-xs text-cyber-bg">CR</span>
+      <header className="bg-cyber-dark border-b border-cyber-light">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="flex items-center justify-between h-20">
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-cyber-primary rounded-xl flex items-center justify-center">
+                <span className="font-mono text-xs text-cyber-bg font-bold">CR</span>
               </div>
-              <h1 className="font-pixel text-cyber-yellow text-lg">CyberRaksha</h1>
+              <h1 className="font-mono text-cyber-primary text-xl font-bold">CyberRaksha</h1>
             </div>
           </div>
         </div>
@@ -29,10 +29,10 @@ export default function Landing() {
               <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-cyber-blue to-cyber-green rounded-lg pixel-border flex items-center justify-center">
                 <span className="text-4xl">🎮</span>
               </div>
-              <h1 className="font-pixel text-4xl md:text-6xl text-cyber-yellow mb-6">
+              <h1 className="font-mono text-5xl md:text-7xl text-cyber-secondary mb-8 font-bold">
                 CyberRaksha
               </h1>
-              <h2 className="font-pixel text-xl md:text-2xl text-cyber-green mb-6">
+              <h2 className="font-mono text-2xl md:text-3xl text-cyber-primary mb-8 font-semibold">
                 Gamified Cyber Safety Learning
               </h2>
               <p className="text-lg text-cyber-muted mb-8 max-w-2xl mx-auto font-inter">
@@ -49,7 +49,7 @@ export default function Landing() {
             >
               <a
                 href="/api/login"
-                className="pixel-button inline-block px-8 py-4 text-lg font-pixel rounded-lg"
+                className="modern-button inline-block px-10 py-4 text-lg font-mono rounded-xl font-semibold"
                 data-testid="button-login"
               >
                 Start Your Journey

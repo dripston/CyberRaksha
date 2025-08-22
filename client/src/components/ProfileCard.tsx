@@ -14,7 +14,7 @@ export default function ProfileCard({ user, userBadges }: ProfileCardProps) {
 
   return (
     <>
-      <div className="retro-card rounded-lg p-6 mb-6">
+      <div className="cyber-card p-8 mb-8">
         <div className="text-center">
           {/* Avatar */}
           <div className="w-24 h-24 mx-auto mb-4 relative">
@@ -34,42 +34,42 @@ export default function ProfileCard({ user, userBadges }: ProfileCardProps) {
             </div>
           </div>
           
-          <h2 className="font-pixel text-lg text-cyber-yellow mb-2" data-testid="text-username">
+          <h2 className="font-mono text-xl text-cyber-secondary mb-3 font-bold" data-testid="text-username">
             {displayName}
           </h2>
-          <div className="text-sm text-cyber-muted mb-4">{user.rank || 'Bronze'} Cyber Guardian</div>
+          <div className="text-base text-cyber-primary mb-6 font-medium">{user.rank || 'Bronze'} Cyber Guardian</div>
           
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-cyber-bg rounded p-3 border border-cyber-light">
-              <div className="font-pixel text-xs text-cyber-green mb-1">XP</div>
-              <div className="text-xl font-bold text-cyber-text" data-testid="text-xp">
+          <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="bg-cyber-bg rounded-lg p-4 border border-cyber-light">
+              <div className="font-mono text-sm text-cyber-primary mb-2 font-medium">XP</div>
+              <div className="text-2xl font-bold text-cyber-secondary" data-testid="text-xp">
                 {user.xp || 0}
               </div>
             </div>
-            <div className="bg-cyber-bg rounded p-3 border border-cyber-light">
-              <div className="font-pixel text-xs text-cyber-blue mb-1">Badges</div>
-              <div className="text-xl font-bold text-cyber-text" data-testid="text-badges">
+            <div className="bg-cyber-bg rounded-lg p-4 border border-cyber-light">
+              <div className="font-mono text-sm text-cyber-primary mb-2 font-medium">Badges</div>
+              <div className="text-2xl font-bold text-cyber-secondary" data-testid="text-badges">
                 {userBadges.length}
               </div>
             </div>
-            <div className="bg-cyber-bg rounded p-3 border border-cyber-light">
-              <div className="font-pixel text-xs text-cyber-yellow mb-1">Streak</div>
-              <div className="text-xl font-bold text-cyber-text flex items-center" data-testid="text-streak">
+            <div className="bg-cyber-bg rounded-lg p-4 border border-cyber-light">
+              <div className="font-mono text-sm text-cyber-primary mb-2 font-medium">Streak</div>
+              <div className="text-2xl font-bold text-cyber-secondary flex items-center" data-testid="text-streak">
                 <span>{user.streak || 0}</span>
-                <span className="text-cyber-red ml-1">🔥</span>
+                <span className="text-orange-500 ml-2">🔥</span>
               </div>
             </div>
-            <div className="bg-cyber-bg rounded p-3 border border-cyber-light">
-              <div className="font-pixel text-xs text-cyber-red mb-1">Rank</div>
-              <div className="text-sm font-bold text-cyber-text" data-testid="text-rank">
+            <div className="bg-cyber-bg rounded-lg p-4 border border-cyber-light">
+              <div className="font-mono text-sm text-cyber-primary mb-2 font-medium">Rank</div>
+              <div className="text-lg font-bold text-cyber-secondary" data-testid="text-rank">
                 {user.rank || 'Bronze'}
               </div>
             </div>
           </div>
           
           <button 
-            className="pixel-button w-full py-3 px-4 rounded font-pixel text-xs"
+            className="modern-button w-full py-4 px-6 rounded-lg font-mono text-base"
             data-testid="button-view-profile"
           >
             View Profile
@@ -78,8 +78,8 @@ export default function ProfileCard({ user, userBadges }: ProfileCardProps) {
       </div>
       
       {/* Recent Badges */}
-      <div className="retro-card rounded-lg p-6">
-        <h3 className="font-pixel text-sm text-cyber-yellow mb-4">Recent Badges</h3>
+      <div className="cyber-card p-8">
+        <h3 className="font-mono text-base text-cyber-primary mb-6 font-semibold">Recent Badges</h3>
         <div className="space-y-3">
           {userBadges.length === 0 ? (
             <div className="text-center text-cyber-muted text-sm py-4">

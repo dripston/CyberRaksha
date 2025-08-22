@@ -83,8 +83,8 @@ export default function Dashboard() {
     <div className="min-h-screen bg-cyber-bg text-cyber-text">
       <Header user={user} />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <main className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
           
           {/* Profile Card Sidebar */}
           <div className="lg:col-span-1">
@@ -99,58 +99,58 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="retro-card rounded-lg p-6 mb-8"
+              className="cyber-card p-8 mb-12"
             >
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h2 className="font-pixel text-xl text-cyber-yellow mb-2">
+                  <h2 className="font-mono text-2xl text-cyber-secondary mb-3 font-bold">
                     Welcome Back, Warrior!
                   </h2>
-                  <p className="text-cyber-muted">
+                  <p className="text-cyber-muted text-lg leading-relaxed">
                     Continue your cyber safety journey and level up your skills.
                   </p>
                 </div>
                 <div className="hidden md:block">
-                  <div className="w-16 h-16 bg-gradient-to-br from-cyber-green to-cyber-blue rounded-lg pixel-border flex items-center justify-center animate-pulse-slow">
-                    <span className="text-2xl">🎮</span>
+                  <div className="w-20 h-20 bg-cyber-primary rounded-2xl flex items-center justify-center animate-pulse-slow">
+                    <span className="text-3xl">🎮</span>
                   </div>
                 </div>
               </div>
               
               {/* XP Progress Bar */}
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-pixel text-xs text-cyber-green">
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="font-mono text-sm text-cyber-primary font-medium">
                     XP Progress to Level {(user?.level || 1) + 1}
                   </span>
-                  <span className="text-sm text-cyber-muted">
+                  <span className="text-base text-cyber-muted font-medium">
                     {user?.xp || 0} / {nextLevelXP} XP
                   </span>
                 </div>
                 <ProgressBar progress={progressToNext} />
-                <div className="text-xs text-cyber-muted mt-1">
+                <div className="text-sm text-cyber-muted mt-2">
                   {nextLevelXP - (user?.xp || 0)} XP needed for next level
                 </div>
               </div>
             </motion.div>
             
             {/* Active Courses */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="font-pixel text-lg text-cyber-yellow">Active Courses</h2>
-                <button className="text-sm text-cyber-green hover:text-cyber-yellow transition-colors font-medium">
+            <div className="mb-12">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="font-mono text-xl text-cyber-secondary font-bold">Active Courses</h2>
+                <button className="text-base text-cyber-primary hover:text-cyber-accent transition-colors font-medium">
                   View All Courses →
                 </button>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                 {coursesLoading ? (
                   Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="retro-card rounded-lg p-6 animate-pulse">
-                      <div className="h-32 bg-cyber-light rounded mb-4"></div>
-                      <div className="h-4 bg-cyber-light rounded mb-2"></div>
-                      <div className="h-3 bg-cyber-light rounded mb-4"></div>
-                      <div className="h-2 bg-cyber-light rounded"></div>
+                    <div key={i} className="cyber-card p-8 animate-pulse">
+                      <div className="h-40 bg-cyber-light rounded-lg mb-6"></div>
+                      <div className="h-5 bg-cyber-light rounded mb-3"></div>
+                      <div className="h-4 bg-cyber-light rounded mb-6"></div>
+                      <div className="h-3 bg-cyber-light rounded"></div>
                     </div>
                   ))
                 ) : (

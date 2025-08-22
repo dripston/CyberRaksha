@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -25,17 +25,17 @@
   --ring: hsl(202.8169 89.1213% 53.1373%);
 
   /* Cyber theme colors */
-  --cyber-bg: hsl(240 10% 3.9%);
-  --cyber-dark: hsl(240 6% 8%);
-  --cyber-light: hsl(240 5% 15%);
-  --cyber-yellow: hsl(51 84% 72%);
-  --cyber-green: hsl(80 60% 60%);
-  --cyber-blue: hsl(195 75% 65%);
-  --cyber-red: hsl(16 80% 65%);
-  --cyber-text: hsl(0 0% 95%);
-  --cyber-muted: hsl(240 5% 64%);
+  --cyber-bg: hsl(222 84% 4.9%);
+  --cyber-dark: hsl(222 47% 11%);
+  --cyber-light: hsl(217 32% 17%);
+  --cyber-primary: hsl(213 93% 67%);
+  --cyber-secondary: hsl(210 40% 98%);
+  --cyber-accent: hsl(221 83% 53%);
+  --cyber-muted-blue: hsl(215 28% 43%);
+  --cyber-text: hsl(210 40% 98%);
+  --cyber-muted: hsl(217 10% 64%);
 
-  --font-pixel: "Press Start 2P", cursive;
+  --font-mono: "JetBrains Mono", "Space Mono", monospace;
   --font-inter: "Inter", sans-serif;
   --radius: 0.5rem;
 }
@@ -70,6 +70,7 @@
   body {
     @apply font-inter antialiased bg-cyber-bg text-cyber-text;
     font-family: var(--font-inter);
+    line-height: 1.6;
   }
 
   html {
@@ -78,27 +79,29 @@
 }
 
 @layer components {
-  .pixel-border {
-    border: 3px solid;
-    border-image: linear-gradient(45deg, var(--cyber-yellow), var(--cyber-green)) 1;
+  .modern-border {
+    border: 1px solid var(--cyber-light);
+    border-radius: 12px;
   }
   
-  .retro-card {
-    background: linear-gradient(135deg, var(--cyber-dark) 0%, var(--cyber-light) 100%);
-    border: 2px solid hsl(217 13% 17%);
+  .cyber-card {
+    background: linear-gradient(135deg, var(--cyber-dark) 0%, hsl(222 47% 9%) 100%);
+    border: 1px solid var(--cyber-light);
+    border-radius: 16px;
     transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
   }
   
-  .retro-card:hover {
-    border-color: var(--cyber-green);
-    box-shadow: 0 0 20px hsl(80 100% 50% / 0.2);
-    transform: translateY(-2px);
+  .cyber-card:hover {
+    border-color: var(--cyber-primary);
+    box-shadow: 0 8px 32px hsl(213 93% 67% / 0.1);
+    transform: translateY(-4px);
   }
   
   .progress-bar {
-    background: linear-gradient(90deg, var(--cyber-green) 0%, var(--cyber-yellow) 100%);
-    height: 8px;
-    border-radius: 4px;
+    background: linear-gradient(90deg, var(--cyber-primary) 0%, var(--cyber-accent) 100%);
+    height: 6px;
+    border-radius: 8px;
     position: relative;
     overflow: hidden;
   }
@@ -110,39 +113,39 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
-    animation: shine 2s infinite;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+    animation: shine 3s infinite;
   }
   
   .badge-glow {
-    filter: drop-shadow(0 0 8px hsl(51 100% 50% / 0.6));
+    filter: drop-shadow(0 0 8px hsl(213 93% 67% / 0.4));
   }
   
-  .pixel-button {
-    background: linear-gradient(45deg, var(--cyber-yellow), var(--cyber-green));
+  .modern-button {
+    background: var(--cyber-primary);
     border: none;
     color: var(--cyber-bg);
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-weight: 600;
     transition: all 0.2s ease;
-    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.3);
-    font-family: var(--font-pixel);
+    border-radius: 8px;
+    font-family: var(--font-mono);
+    font-size: 14px;
   }
   
-  .pixel-button:hover {
-    transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+  .modern-button:hover {
+    background: var(--cyber-accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(213 93% 67% / 0.2);
   }
   
   .level-indicator {
-    background: radial-gradient(circle, var(--cyber-yellow), hsl(39 100% 50%));
-    border: 3px solid #fff;
-    box-shadow: 0 0 15px hsl(51 100% 50% / 0.5);
+    background: var(--cyber-primary);
+    border: 2px solid var(--cyber-secondary);
+    box-shadow: 0 0 12px hsl(213 93% 67% / 0.3);
   }
 
-  .font-pixel {
-    font-family: var(--font-pixel);
+  .font-mono {
+    font-family: var(--font-mono);
   }
 
   .font-inter {
