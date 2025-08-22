@@ -1,0 +1,80 @@
+{
+  "project": "CyberQuest - Gamified Cyber Safety Learning Platform",
+  "stack": "React + TailwindCSS + Framer Motion",
+  "description": "Build a Codédex-style gamified platform for cyber safety awareness with pixel-art inspired UI, courses, badges, streaks, and profile cards.",
+  "ui": {
+    "theme": {
+      "mode": "dark",
+      "background": "#0d1117",
+      "accentColors": {
+        "yellow": "#FFD700",
+        "green": "#A8FF00",
+        "blue": "#00C2FF",
+        "red": "#FF4500"
+      },
+      "fonts": {
+        "primary": "'Press Start 2P', cursive",
+        "secondary": "Inter, sans-serif"
+      }
+    },
+    "components": {
+      "profileCard": {
+        "avatar": "pixel-art avatar placeholder",
+        "username": "rehaanN",
+        "level": 3,
+        "stats": {
+          "xp": 320,
+          "rank": "Bronze",
+          "badges": 3,
+          "streak": 1
+        },
+        "button": "View Profile"
+      },
+      "dashboard": {
+        "courses": [
+          {
+            "title": "Safe UPI Payments",
+            "progress": 40,
+            "banner": "pixel lock + bank graphic",
+            "difficulty": "Beginner"
+          },
+          {
+            "title": "Spot the Phishing Scam",
+            "progress": 0,
+            "banner": "pixel email graphic",
+            "difficulty": "Intermediate"
+          },
+          {
+            "title": "Social Media Safety",
+            "progress": 80,
+            "banner": "pixel phone + shield",
+            "difficulty": "Advanced"
+          }
+        ],
+        "badges": [
+          {
+            "name": "First Login",
+            "icon": "pixel star"
+          },
+          {
+            "name": "Cyber Guardian",
+            "icon": "pixel shield"
+          },
+          {
+            "name": "Quiz Master",
+            "icon": "pixel fire"
+          }
+        ]
+      }
+    }
+  },
+  "interactivity": {
+    "courseFlow": "Each course has multiple levels (quiz + mini game). Completing levels gives XP and badges.",
+    "streaks": "Daily login and course completion increase streak count.",
+    "animations": "Framer Motion for card hover, XP bar growth, badge unlock animation."
+  },
+  "assets": {
+    "style": "retro pixel-art (8bit style)",
+    "icons": "use free pixel-art icons or generate custom assets"
+  }
+}
