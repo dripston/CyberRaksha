@@ -18,7 +18,7 @@ const mockCourses: Course[] = [
     title: "Safe UPI Payments",
     description: "Master the art of secure digital payments in India's UPI ecosystem. Learn to identify payment methods and avoid cyber traps.",
     difficulty: "beginner",
-    totalLessons: 8,
+    totalLessons: 6,
     xpPerLesson: 50,
     icon: "🎯",
     createdAt: new Date()
@@ -99,19 +99,22 @@ export default function Dashboard() {
   }, [profile, isLoading, toast]);
 
   const { data: userProgress = [], isLoading: progressLoading } = useQuery<(UserProgress & { course: Course })[]>({
-    queryKey: ["/api/user/progress"],
-    enabled: !!profile,
+    queryKey: ["/api/user/progress", profile?.id],
+    queryFn: () => fetch(`/api/user/progress?userId=${profile?.id}`).then(res => res.json()),
+    enabled: !!profile?.id,
     retry: false,
   });
 
   const { data: userBadges = [], isLoading: badgesLoading } = useQuery<any[]>({
-    queryKey: ["/api/user/badges"],
-    enabled: !!profile,
+    queryKey: ["/api/user/badges", profile?.id],
+    queryFn: () => fetch(`/api/user/badges?userId=${profile?.id}`).then(res => res.json()),
+    enabled: !!profile?.id,
     retry: false,
   });
 
   const { data: leaderboard = [] } = useQuery<any[]>({
-    queryKey: ["/api/leaderboard"],
+    queryKey: ["/api/progress/leaderboard"],
+    queryFn: () => fetch('/api/progress/leaderboard').then(res => res.json()),
     enabled: !!profile,
     retry: false,
   });

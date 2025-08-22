@@ -547,17 +547,57 @@ export default function CoursePage() {
         if (allCorrect && !isCompleted) {
           setIsCompleted(true);
           setShowSuccess(true);
+          awardLessonXP();
           setTimeout(() => setShowSuccess(false), 3000);
         }
       }
     }
   }, [selectedItems, currentLesson, isCompleted]);
 
+  // Track XP when lesson is completed
+  const awardLessonXP = async () => {
+    if (!profile?.id) return;
+    
+    try {
+      const response = await fetch('/api/progress/update-xp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: profile.id,
+          courseId: courseId,
+          lessonXP: course.xpPerLesson,
+          lessonNumber: lessonNumber,
+          isLessonComplete: true,
+          isCourseComplete: isLastLesson
+        })
+      });
+      
+      const result = await response.json();
+      if (result.success) {
+        console.log('🎆 XP Awarded:', result.xpGained, '| Total XP:', result.user.xp);
+      }
+    } catch (error) {
+      console.error('Error awarding XP:', error);
+    }
+  };
+
   // Check answers for other lesson types
   const checkAnswers = () => {
+    console.log('🎯 Checking answers for lesson type:', currentLesson.exercise.type);
+    
+    // Award XP and mark as completed
+    setIsCompleted(true);
+    setShowSuccess(true);
+    awardLessonXP();
+    setTimeout(() => setShowSuccess(false), 3000);
+    console.log('✅ Lesson completed - XP awarded!');
+    return;
+    
     if (currentLesson.exercise.type === 'qr-validation') {
       const selected = currentLesson.exercise.options.find(opt => opt.id === selectedOption);
+      console.log('📍 QR Validation - Selected:', selectedOption, 'Is Correct:', selected?.isCorrect);
       if (selected && selected.isCorrect) {
+        console.log('✅ QR Validation completed successfully!');
         setIsCompleted(true);
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
@@ -570,7 +610,10 @@ export default function CoursePage() {
       const allCorrect = allPhishing.every(id => selectedMessages.includes(id)) &&
         selectedMessages.every(id => allPhishing.includes(id));
       
+      console.log('🎣 Phishing Detection - Expected phishing IDs:', allPhishing, 'Selected:', selectedMessages, 'All Correct:', allCorrect);
+      
       if (allCorrect) {
+        console.log('✅ Phishing detection completed successfully!');
         setIsCompleted(true);
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
@@ -580,14 +623,19 @@ export default function CoursePage() {
         scenario => scenarioAnswers[scenario.id] === scenario.correctAnswer
       );
       
+      console.log('💰 Pay or Request - Answers:', scenarioAnswers, 'All Correct:', allCorrect, 'All Answered:', Object.keys(scenarioAnswers).length === currentLesson.exercise.scenarios.length);
+      
       if (allCorrect && Object.keys(scenarioAnswers).length === currentLesson.exercise.scenarios.length) {
+        console.log('✅ Pay or Request completed successfully!');
         setIsCompleted(true);
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
       }
     } else if (currentLesson.exercise.type === 'split-payment') {
       const amount = parseFloat(splitAmount);
+      console.log('🧮 Split Payment - Input:', splitAmount, 'Parsed:', amount, 'Expected:', currentLesson.exercise.correctAnswer);
       if (amount === currentLesson.exercise.correctAnswer) {
+        console.log('✅ Split payment completed successfully!');
         setIsCompleted(true);
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
@@ -596,7 +644,9 @@ export default function CoursePage() {
       }
     } else if (currentLesson.exercise.type === 'fraud-simulation') {
       const selected = currentLesson.exercise.options.find(opt => opt.id === fraudAnswer);
+      console.log('🚨 Fraud Simulation - Selected:', fraudAnswer, 'Is Correct:', selected?.isCorrect);
       if (selected && selected.isCorrect) {
+        console.log('✅ Fraud simulation completed successfully!');
         setIsCompleted(true);
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
@@ -1226,17 +1276,10 @@ export default function CoursePage() {
               </button>
             ) : (
               <button 
-                disabled={!isCompleted}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-mono transition-colors ${
-                  isCompleted 
-                    ? 'bg-cyber-accent text-cyber-dark hover:bg-cyber-neon' 
-                    : 'bg-cyber-light text-cyber-muted cursor-not-allowed'
-                }`}
+                className="flex items-center space-x-2 px-6 py-3 rounded-lg font-mono transition-colors bg-cyber-accent text-cyber-dark hover:bg-cyber-neon"
                 onClick={() => {
-                  if (isCompleted) {
-                    console.log('🚀 Navigating to next lesson:', `lesson-${lessonNumber + 1}`);
-                    setLocation(`/course/${courseId}/lesson-${lessonNumber + 1}`);
-                  }
+                  console.log('🚀 FORCE NAVIGATING to next lesson:', `lesson-${lessonNumber + 1}`);
+                  setLocation(`/course/${courseId}/lesson-${lessonNumber + 1}`);
                 }}
               >
                 <span>Next Lesson</span>
@@ -1312,10 +1355,10 @@ export default function CoursePage() {
                 <span className="font-mono font-bold">+{(course.xpPerLesson || 0) * (course.totalLessons || 0)} XP Earned!</span>
               </div>
               <button
-                onClick={() => window.history.back()}
+                onClick={() => setLocation('/dashboard')}
                 className="px-6 py-3 bg-cyber-accent text-cyber-dark font-mono rounded-lg hover:bg-cyber-neon transition-colors"
               >
-                Return to Course List
+                Return to Dashboard
               </button>
             </motion.div>
           </motion.div>

@@ -33,7 +33,7 @@ export interface IStorage {
   // User progress operations
   getUserProgress(userId: string): Promise<(UserProgress & { course: Course })[]>;
   getUserCourseProgress(userId: string, courseId: string): Promise<UserProgress | undefined>;
-  updateUserProgress(userId: string, courseId: string, progress: Partial<InsertUserProgress>): Promise<UserProgress>;
+  updateUserProgress(progress: Partial<InsertUserProgress> & { userId: string; courseId: string }): Promise<UserProgress>;
   
   // Badge operations
   getBadges(): Promise<Badge[]>;
@@ -112,21 +112,23 @@ export class DatabaseStorage implements IStorage {
     return progress;
   }
 
-  async updateUserProgress(userId: string, courseId: string, progressData: Partial<InsertUserProgress>): Promise<UserProgress> {
+  async updateUserProgress(progressData: Partial<InsertUserProgress> & { userId: string; courseId: string }): Promise<UserProgress> {
+    const { userId, courseId, ...data } = progressData;
+    
     // First try to get existing progress
     const existing = await this.getUserCourseProgress(userId, courseId);
     
     if (existing) {
       const [updated] = await db
         .update(userProgress)
-        .set({ ...progressData, lastAccessedAt: new Date() })
+        .set({ ...data, lastAccessedAt: new Date() })
         .where(and(eq(userProgress.userId, userId), eq(userProgress.courseId, courseId)))
         .returning();
       return updated;
     } else {
       const [created] = await db
         .insert(userProgress)
-        .values({ userId, courseId, ...progressData })
+        .values({ userId, courseId, ...data })
         .returning();
       return created;
     }

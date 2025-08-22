@@ -2,10 +2,145 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertCourseSchema, insertUserProgressSchema } from "@shared/schema";
+import { db } from "./db";
+import { users, userProgress, courses, badges, userBadges } from "@shared/schema";
+import { eq, desc, and } from "drizzle-orm";
+import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize default data
   await initializeDefaultData();
+
+  // Progress routes (inline)
+  const updateXPSchema = z.object({
+    courseId: z.string(),
+    lessonXP: z.number().min(1),
+    lessonNumber: z.number().min(1),
+    isLessonComplete: z.boolean(),
+    isCourseComplete: z.boolean().optional(),
+  });
+
+  app.post('/api/progress/update-xp', async (req, res) => {
+    try {
+      const { userId, courseId, lessonXP, lessonNumber, isLessonComplete, isCourseComplete } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ error: "User ID required" });
+      }
+
+      // Validate input
+      const parsed = updateXPSchema.safeParse({
+        courseId,
+        lessonXP,
+        lessonNumber,
+        isLessonComplete,
+        isCourseComplete
+      });
+
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid request data" });
+      }
+
+      // Get current user
+      const [currentUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      if (!currentUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Start transaction
+      await db.transaction(async (tx) => {
+        // Update user's total XP
+        await tx
+          .update(users)
+          .set({ 
+            xp: (currentUser.xp || 0) + lessonXP,
+            updatedAt: new Date()
+          })
+          .where(eq(users.id, userId));
+
+        // Update or create user progress
+        const existingProgress = await tx
+          .select()
+          .from(userProgress)
+          .where(and(
+            eq(userProgress.userId, userId),
+            eq(userProgress.courseId, courseId)
+          ))
+          .limit(1);
+
+        if (existingProgress.length > 0) {
+          await tx
+            .update(userProgress)
+            .set({
+              completedLessons: lessonNumber,
+              isCompleted: isCourseComplete || false,
+              lastAccessedAt: new Date()
+            })
+            .where(eq(userProgress.id, existingProgress[0].id));
+        } else {
+          await tx
+            .insert(userProgress)
+            .values({
+              userId: userId,
+              courseId: courseId,
+              completedLessons: lessonNumber,
+              isCompleted: isCourseComplete || false,
+              lastAccessedAt: new Date()
+            });
+        }
+      });
+
+      // Return updated user data
+      const updatedUserData = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      res.json({ 
+        success: true, 
+        user: updatedUserData[0],
+        xpGained: lessonXP 
+      });
+
+    } catch (error) {
+      console.error("Error updating XP:", error);
+      res.status(500).json({ error: "Failed to update progress" });
+    }
+  });
+
+  app.get('/api/progress/leaderboard', async (req, res) => {
+    try {
+      const leaderboard = await db
+        .select({
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          xp: users.xp,
+          level: users.level,
+          rank: users.rank
+        })
+        .from(users)
+        .orderBy(desc(users.xp))
+        .limit(50);
+
+      const leaderboardWithPositions = leaderboard.map((user, index) => ({
+        ...user,
+        position: index + 1
+      }));
+
+      res.json(leaderboardWithPositions);
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      res.status(500).json({ error: "Failed to fetch leaderboard" });
+    }
+  });
 
   // Course routes
   app.get('/api/courses', async (req, res) => {
@@ -31,16 +166,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User progress routes (using profile ID from query params)
+  // Get all user progress
   app.get('/api/user/progress', async (req, res) => {
     try {
-      const profileId = req.query.profileId as string;
-      if (!profileId) {
-        return res.status(400).json({ message: "Profile ID is required" });
+      const userId = req.query.userId as string;
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
       }
       
-      // For now, return empty progress since we're using client-side profiles
-      res.json([]);
+      const userProgress = await storage.getUserProgress(userId);
+      res.json(userProgress);
     } catch (error) {
       console.error("Error fetching user progress:", error);
       res.status(500).json({ message: "Failed to fetch user progress" });
@@ -50,19 +185,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/user/progress/:courseId', async (req, res) => {
     try {
       const { courseId } = req.params;
-      const { profileId, progressData } = req.body;
+      const { userId, completedLessons, isCompleted } = req.body;
       
-      if (!profileId) {
-        return res.status(400).json({ message: "Profile ID is required" });
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
       }
 
-      // For now, return success since we're using client-side profiles
-      res.json({ 
-        courseId, 
-        profileId, 
-        completedLessons: progressData?.completedLessons || 0,
-        isCompleted: progressData?.isCompleted || false
+      const progress = await storage.updateUserProgress({
+        userId,
+        courseId,
+        completedLessons,
+        isCompleted
       });
+      
+      res.json(progress);
     } catch (error) {
       console.error("Error updating user progress:", error);
       res.status(500).json({ message: "Failed to update user progress" });
@@ -82,13 +218,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/user/badges', async (req, res) => {
     try {
-      const profileId = req.query.profileId as string;
-      if (!profileId) {
-        return res.status(400).json({ message: "Profile ID is required" });
+      const userId = req.query.userId as string;
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
       }
       
-      // For now, return empty badges since we're using client-side profiles
-      res.json([]);
+      const userBadges = await storage.getUserBadges(userId);
+      res.json(userBadges);
     } catch (error) {
       console.error("Error fetching user badges:", error);
       res.status(500).json({ message: "Failed to fetch user badges" });
@@ -98,9 +234,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Leaderboard route
   app.get('/api/leaderboard', async (req, res) => {
     try {
-      const limit = parseInt(req.query.limit as string) || 10;
-      // For now, return empty leaderboard since we're using client-side profiles
-      res.json([]);
+      const limit = parseInt(req.query.limit as string) || 50;
+      const leaderboard = await storage.getLeaderboard(limit);
+      res.json(leaderboard);
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
       res.status(500).json({ message: "Failed to fetch leaderboard" });
