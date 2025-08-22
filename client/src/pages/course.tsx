@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useRoute } from 'wouter';
+import { useRoute, useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, CheckCircle, BookOpen, Zap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -494,6 +494,7 @@ interface Lesson {
 
 export default function CoursePage() {
   const [, params] = useRoute<{ courseId: string; lessonId?: string }>('/course/:courseId/:lessonId?');
+  const [, setLocation] = useLocation();
   const { profile } = useAuth();
   const [selectedItems, setSelectedItems] = useState<Record<string, string[]>>({
     'QR Code': [],
@@ -1232,7 +1233,10 @@ export default function CoursePage() {
                     : 'bg-cyber-light text-cyber-muted cursor-not-allowed'
                 }`}
                 onClick={() => {
-                  window.location.href = `/course/${courseId}/lesson-${lessonNumber + 1}`;
+                  if (isCompleted) {
+                    console.log('🚀 Navigating to next lesson:', `lesson-${lessonNumber + 1}`);
+                    setLocation(`/course/${courseId}/lesson-${lessonNumber + 1}`);
+                  }
                 }}
               >
                 <span>Next Lesson</span>
