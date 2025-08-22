@@ -12,13 +12,9 @@ const mockCourse: Course = {
   description: "Master the art of secure digital payments in India's UPI ecosystem.",
   difficulty: "beginner",
   totalLessons: 6,
-  estimatedDuration: 45,
-  category: "digital-payments",
-  thumbnail: "/images/upi-payments.jpg",
-  isActive: true,
   xpPerLesson: 50,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString()
+  icon: "🎯",
+  createdAt: new Date()
 };
 
 // Lesson data for "Safe UPI Payments" course
@@ -849,9 +845,10 @@ export default function CoursePage() {
                 <>
                   {/* Categories */}
                   {currentLesson.exercise.categories.map((category) => {
-                    const hasCorrectItems = getItemsInCategory(category).every(item => 
-                      item && currentLesson.exercise.items.find(i => i.id === item.id)?.type === category
-                    );
+                    const hasCorrectItems = getItemsInCategory(category).every(item => {
+                      if (!item || currentLesson.exercise.type !== 'mcq-categorization') return false;
+                      return currentLesson.exercise.items.find((i: LessonItem) => i.id === item.id)?.type === category;
+                    });
                     const categoryIcon = category === 'QR Code' ? '📱' : category === 'UPI ID' ? '🆔' : '📞';
                     const isActive = activeCategory === category;
                     const hasItems = getItemsInCategory(category).length > 0;
@@ -897,7 +894,7 @@ export default function CoursePage() {
                         {hasItems && (
                           <div className="ml-8 space-y-3">
                             {getItemsInCategory(category).map((item) => {
-                              const isCorrect = item && currentLesson.exercise.items.find(i => i.id === item.id)?.type === category;
+                              const isCorrect = item && currentLesson.exercise.type === 'mcq-categorization' && currentLesson.exercise.items.find((i: LessonItem) => i.id === item.id)?.type === category;
                               return (
                                 <div
                                   key={item?.id}
@@ -1308,7 +1305,7 @@ export default function CoursePage() {
               </p>
               <div className="flex items-center justify-center space-x-2 text-cyber-accent mb-6">
                 <Zap size={20} />
-                <span className="font-mono font-bold">+{course.xpPerLesson * course.totalLessons} XP Earned!</span>
+                <span className="font-mono font-bold">+{(course.xpPerLesson || 0) * (course.totalLessons || 0)} XP Earned!</span>
               </div>
               <button
                 onClick={() => window.history.back()}

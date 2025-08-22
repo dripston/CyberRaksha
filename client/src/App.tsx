@@ -13,11 +13,22 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const { user, profile, isLoading } = useAuth();
 
+  console.log('Router state:', { user: !!user, profile: !!profile, isLoading, userEmail: user?.email });
+
+  // Show loading state while authentication is being determined
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-cyber-bg flex items-center justify-center">
+        <div className="text-cyber-accent font-mono text-lg">
+          Loading...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Switch>
-      {isLoading ? (
-        <Route path="/" component={Landing} />
-      ) : user && profile ? (
+      {user && profile ? (
         <>
           <Route path="/" component={Dashboard} />
           <Route path="/course/:courseId/:lessonId?" component={CoursePage} />

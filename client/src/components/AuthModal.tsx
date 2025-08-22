@@ -97,17 +97,23 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     setError('');
-    console.log('Attempting Google sign in with redirect...');
+    console.log('🚀 AuthModal: Attempting Google sign in with popup...');
+    console.log('🌐 AuthModal: Current URL:', window.location.href);
+    console.log('🔑 AuthModal: Auth domain:', 'cyberraksha-7cbbc.firebaseapp.com');
 
     try {
-      // This will initiate a redirect, so the page will reload
-      await authService.signInWithGoogle();
-      // We won't reach this line because of the redirect
+      console.log('📞 AuthModal: Calling authService.signInWithGoogle...');
+      const { user, profile } = await authService.signInWithGoogle();
+      console.log('✅ AuthModal: Google sign-in successful:', { user: user.email, profile });
+      
+      // Set authenticated user and close modal
+      setAuthenticatedUser(user, profile);
+      handleClose();
     } catch (error: any) {
-      console.error('Google sign in error:', error);
-      if (error.message !== 'Redirect initiated') {
-        setError(error.message || 'Google sign in failed');
-      }
+      console.error('❌ AuthModal: Google sign in error:', error);
+      console.log('🔍 AuthModal: Error details:', { message: error.message, code: error.code, stack: error.stack });
+      setError(error.message || 'Google sign in failed');
+    } finally {
       setIsLoading(false);
     }
   };

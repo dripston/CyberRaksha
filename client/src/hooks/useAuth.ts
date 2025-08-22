@@ -20,33 +20,23 @@ export function useAuth() {
   useEffect(() => {
     let isMounted = true;
 
-    // Check for Google redirect result first
-    const checkRedirectResult = async () => {
-      try {
-        const redirectResult = await authService.handleGoogleRedirect();
-        if (redirectResult && isMounted) {
-          setUser(redirectResult.user);
-          setProfile(redirectResult.profile);
-          saveProfileToLocalStorage(redirectResult.profile);
-        }
-      } catch (error) {
-        console.error('Error handling redirect result:', error);
-      }
-    };
-
-    checkRedirectResult();
+    console.log('🚀 useAuth: Initializing auth state listener...');
 
     // Listen to authentication state changes
     const unsubscribe = authService.onAuthStateChanged(async (firebaseUser) => {
       if (!isMounted) return;
 
+      console.log('🔒 useAuth: Auth state changed:', { user: firebaseUser ? firebaseUser.email : 'null', isMounted });
+
       if (firebaseUser) {
+        console.log('👤 useAuth: User authenticated, setting up profile...');
         setUser(firebaseUser);
         
         // Try to get user profile from cache first
         let userProfile = getProfileFromLocalStorage();
         
         if (!userProfile) {
+          console.log('🆕 useAuth: Creating new profile for user');
           // Create temporary profile since Firestore is disabled
           const username = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User';
           userProfile = {
@@ -59,16 +49,21 @@ export function useAuth() {
             rank: "Bronze"
           };
           saveProfileToLocalStorage(userProfile);
+        } else {
+          console.log('📋 useAuth: Using cached profile:', userProfile);
         }
         
         setProfile(userProfile);
+        console.log('✨ useAuth: Profile set, user is authenticated');
       } else {
+        console.log('🚪 useAuth: User signed out, clearing state');
         // User is signed out
         setUser(null);
         setProfile(null);
         clearProfileFromLocalStorage(); // Clear any cached data
       }
       
+      console.log('⏰ useAuth: Setting isLoading to false');
       setIsLoading(false);
     });
 

@@ -19,13 +19,9 @@ const mockCourses: Course[] = [
     description: "Master the art of secure digital payments in India's UPI ecosystem. Learn to identify payment methods and avoid cyber traps.",
     difficulty: "beginner",
     totalLessons: 8,
-    estimatedDuration: 45,
-    category: "digital-payments",
-    thumbnail: "/images/upi-payments.jpg",
-    isActive: true,
     xpPerLesson: 50,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    icon: "🎯",
+    createdAt: new Date()
   },
   {
     id: "password-security-course",
@@ -33,13 +29,9 @@ const mockCourses: Course[] = [
     description: "Learn the basics of creating and managing secure passwords to protect your digital identity.",
     difficulty: "beginner",
     totalLessons: 8,
-    estimatedDuration: 45,
-    category: "authentication",
-    thumbnail: "/images/password-security.jpg",
-    isActive: true,
     xpPerLesson: 50,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    icon: "🔒",
+    createdAt: new Date()
   },
   {
     id: "phishing-detection-course", 
@@ -47,13 +39,9 @@ const mockCourses: Course[] = [
     description: "Master the skills to identify and avoid phishing attacks across email, web, and social platforms.",
     difficulty: "intermediate",
     totalLessons: 12,
-    estimatedDuration: 90,
-    category: "social-engineering",
-    thumbnail: "/images/phishing-detection.jpg",
-    isActive: true,
     xpPerLesson: 75,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    icon: "🎣",
+    createdAt: new Date()
   },
   {
     id: "safe-browsing-course",
@@ -61,13 +49,9 @@ const mockCourses: Course[] = [
     description: "Discover best practices for secure web browsing and protecting your privacy online.",
     difficulty: "beginner",
     totalLessons: 6,
-    estimatedDuration: 30,
-    category: "web-security",
-    thumbnail: "/images/safe-browsing.jpg",
-    isActive: true,
     xpPerLesson: 40,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    icon: "🌐",
+    createdAt: new Date()
   },
   {
     id: "social-media-privacy-course",
@@ -75,13 +59,9 @@ const mockCourses: Course[] = [
     description: "Learn to configure privacy settings and protect your personal information on social platforms.",
     difficulty: "beginner",
     totalLessons: 10,
-    estimatedDuration: 60,
-    category: "privacy",
-    thumbnail: "/images/social-media-privacy.jpg",
-    isActive: true,
     xpPerLesson: 60,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    icon: "🔒",
+    createdAt: new Date()
   },
   {
     id: "advanced-threats-course",
@@ -89,13 +69,9 @@ const mockCourses: Course[] = [
     description: "Deep dive into identifying sophisticated cyber threats and advanced persistent attacks.",
     difficulty: "advanced",
     totalLessons: 15,
-    estimatedDuration: 120,
-    category: "threat-detection",
-    thumbnail: "/images/threat-detection.jpg",
-    isActive: true,
     xpPerLesson: 100,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    icon: "⚠️",
+    createdAt: new Date()
   }
 ];
 

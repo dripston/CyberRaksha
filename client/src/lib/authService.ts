@@ -6,6 +6,7 @@ import {
   User as FirebaseUser,
   updateProfile,
   GoogleAuthProvider,
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult
 } from 'firebase/auth';
@@ -111,12 +112,40 @@ class AuthService {
   // Sign in with Google
   async signInWithGoogle(): Promise<{ user: AuthUser; profile: Profile }> {
     try {
+      console.log('🔑 AuthService: Creating Google auth provider...');
       const provider = new GoogleAuthProvider();
-      await signInWithRedirect(auth, provider);
-      // This method will redirect, so we won't reach the code below
-      // The actual result handling should be done in getRedirectResult
-      throw new Error('Redirect initiated');
+      provider.addScope('email');
+      provider.addScope('profile');
+      console.log('⚙️ AuthService: Provider scopes added');
+      
+      console.log('🌐 AuthService: Current auth state:', {
+        user: auth.currentUser ? auth.currentUser.email : 'none',
+        domain: window.location.hostname,
+        url: window.location.href
+      });
+      
+      console.log('🚀 AuthService: Initiating signInWithPopup...');
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      console.log('✅ AuthService: Popup sign-in successful for user:', user.email);
+      
+      // Create temporary profile
+      const username = user.displayName || user.email?.split('@')[0] || 'User';
+      const profile = {
+        username: username,
+        profession: "User",
+        avatar: "avatar1",
+        xp: 0,
+        level: 1,
+        streak: 0,
+        rank: "Bronze"
+      };
+      console.log('👤 AuthService: Created profile for popup sign-in:', profile);
+      
+      return { user, profile };
     } catch (error: any) {
+      console.error('❌ AuthService: signInWithGoogle error:', error);
+      console.log('🔍 AuthService: Error details:', { message: error.message, code: error.code });
       throw new Error(this.getErrorMessage(error.code));
     }
   }
@@ -124,11 +153,14 @@ class AuthService {
   // Handle Google sign-in redirect result
   async handleGoogleRedirect(): Promise<{ user: AuthUser; profile: Profile } | null> {
     try {
+      console.log('🔍 AuthService: Calling getRedirectResult...');
       const result = await getRedirectResult(auth);
       if (!result) {
+        console.log('ℹ️ AuthService: No redirect result found');
         return null; // No redirect result
       }
       const user = result.user;
+      console.log('✅ AuthService: Redirect result found for user:', user.email);
 
       // Check if profile exists - TEMPORARILY DISABLED
       // let profile = await this.getUserProfile(user.uid);
@@ -144,6 +176,7 @@ class AuthService {
         streak: 0,
         rank: "Bronze"
       };
+      console.log('👤 AuthService: Created temp profile:', profile);
 
       // TEMPORARILY DISABLED Firestore operations
       // await setDoc(doc(db, 'profiles', user.uid), {
@@ -153,8 +186,10 @@ class AuthService {
       //   updatedAt: new Date().toISOString()
       // });
 
+      console.log('✨ AuthService: Returning user and profile');
       return { user, profile };
     } catch (error: any) {
+      console.error('❌ AuthService: Error in handleGoogleRedirect:', error);
       throw new Error(this.getErrorMessage(error.code));
     }
   }
