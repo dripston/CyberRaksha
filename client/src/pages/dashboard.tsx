@@ -10,12 +10,13 @@ import QuickActions from "@/components/QuickActions";
 import { useQuery } from "@tanstack/react-query";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { motion } from "framer-motion";
+import { Course, User, UserProgress, Badge } from "@shared/schema";
 
 interface DashboardData {
-  courses: any[];
-  userProgress: any[];
+  courses: Course[];
+  userProgress: (UserProgress & { course: Course })[];
   userBadges: any[];
-  leaderboard: any[];
+  leaderboard: User[];
 }
 
 export default function Dashboard() {
@@ -37,51 +38,25 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  const { data: courses = [], isLoading: coursesLoading } = useQuery({
+  const { data: courses = [], isLoading: coursesLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
     enabled: isAuthenticated,
     retry: false,
   });
 
-  const { data: userProgress = [], isLoading: progressLoading } = useQuery({
+  const { data: userProgress = [], isLoading: progressLoading } = useQuery<(UserProgress & { course: Course })[]>({
     queryKey: ["/api/user/progress"],
     enabled: isAuthenticated,
     retry: false,
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-    },
   });
 
-  const { data: userBadges = [], isLoading: badgesLoading } = useQuery({
+  const { data: userBadges = [], isLoading: badgesLoading } = useQuery<any[]>({
     queryKey: ["/api/user/badges"],
     enabled: isAuthenticated,
     retry: false,
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-    },
   });
 
-  const { data: leaderboard = [] } = useQuery({
+  const { data: leaderboard = [] } = useQuery<User[]>({
     queryKey: ["/api/leaderboard"],
     enabled: isAuthenticated,
     retry: false,
@@ -96,13 +71,13 @@ export default function Dashboard() {
   }
 
   const getProgressForCourse = (courseId: string) => {
-    const progress = userProgress.find((p: any) => p.courseId === courseId);
-    return progress ? (progress.completedLessons / progress.course.totalLessons) * 100 : 0;
+    const progress = userProgress.find((p) => p.courseId === courseId);
+    return progress ? ((progress.completedLessons || 0) / (progress.course.totalLessons || 1)) * 100 : 0;
   };
 
-  const nextLevelXP = (user.level || 1) * 500;
-  const currentLevelXP = ((user.level || 1) - 1) * 500;
-  const progressToNext = ((user.xp || 0) - currentLevelXP) / (nextLevelXP - currentLevelXP) * 100;
+  const nextLevelXP = (user?.level || 1) * 500;
+  const currentLevelXP = ((user?.level || 1) - 1) * 500;
+  const progressToNext = ((user?.xp || 0) - currentLevelXP) / (nextLevelXP - currentLevelXP) * 100;
 
   return (
     <div className="min-h-screen bg-cyber-bg text-cyber-text">
@@ -146,15 +121,15 @@ export default function Dashboard() {
               <div className="mb-4">
                 <div className="flex justify-between items-center mb-2">
                   <span className="font-pixel text-xs text-cyber-green">
-                    XP Progress to Level {(user.level || 1) + 1}
+                    XP Progress to Level {(user?.level || 1) + 1}
                   </span>
                   <span className="text-sm text-cyber-muted">
-                    {user.xp || 0} / {nextLevelXP} XP
+                    {user?.xp || 0} / {nextLevelXP} XP
                   </span>
                 </div>
                 <ProgressBar progress={progressToNext} />
                 <div className="text-xs text-cyber-muted mt-1">
-                  {nextLevelXP - (user.xp || 0)} XP needed for next level
+                  {nextLevelXP - (user?.xp || 0)} XP needed for next level
                 </div>
               </div>
             </motion.div>
@@ -179,7 +154,7 @@ export default function Dashboard() {
                     </div>
                   ))
                 ) : (
-                  courses.map((course: any, index: number) => (
+                  courses.map((course, index: number) => (
                     <motion.div
                       key={course.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -243,7 +218,7 @@ export default function Dashboard() {
                 </div>
                 
                 <div className="space-y-3">
-                  {leaderboard.slice(0, 3).map((player: any, index: number) => (
+                  {leaderboard.slice(0, 3).map((player, index: number) => (
                     <div key={player.id} className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className={`w-6 h-6 rounded flex items-center justify-center ${
@@ -252,12 +227,12 @@ export default function Dashboard() {
                           <span className="font-pixel text-xs text-cyber-bg">{index + 1}</span>
                         </div>
                         <span className={`text-sm ${
-                          player.id === user.id ? 'text-cyber-text font-bold' : 'text-cyber-text'
+                          player.id === user?.id ? 'text-cyber-text font-bold' : 'text-cyber-text'
                         }`}>
-                          {player.firstName || player.id === user.id ? 'You' : `Player ${index + 1}`}
+                          {player.firstName || player.id === user?.id ? 'You' : `Player ${index + 1}`}
                         </span>
                       </div>
-                      <span className="text-xs text-cyber-green font-bold">{player.xp} XP</span>
+                      <span className="text-xs text-cyber-green font-bold">{player.xp || 0} XP</span>
                     </div>
                   ))}
                 </div>

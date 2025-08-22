@@ -39,6 +39,7 @@ export interface IStorage {
   getBadges(): Promise<Badge[]>;
   getUserBadges(userId: string): Promise<(UserBadge & { badge: Badge })[]>;
   awardBadge(userId: string, badgeId: string): Promise<UserBadge>;
+  createBadge(badge: InsertBadge): Promise<Badge>;
   
   // Leaderboard
   getLeaderboard(limit?: number): Promise<User[]>;
@@ -159,6 +160,11 @@ export class DatabaseStorage implements IStorage {
     return userBadge;
   }
 
+  async createBadge(badgeData: InsertBadge): Promise<Badge> {
+    const [badge] = await db.insert(badges).values(badgeData).returning();
+    return badge;
+  }
+
   // Leaderboard
   async getLeaderboard(limit: number = 10): Promise<User[]> {
     return await db
@@ -173,7 +179,7 @@ export class DatabaseStorage implements IStorage {
     const user = await this.getUser(userId);
     if (!user) throw new Error("User not found");
 
-    const newXp = user.xp + xpGain;
+    const newXp = (user.xp || 0) + xpGain;
     const newLevel = Math.floor(newXp / 500) + 1; // 500 XP per level
     let newRank = user.rank;
 

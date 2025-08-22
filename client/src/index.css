@@ -25,15 +25,15 @@
   --ring: hsl(202.8169 89.1213% 53.1373%);
 
   /* Cyber theme colors */
-  --cyber-bg: hsl(216 15% 6%);
-  --cyber-dark: hsl(220 16% 10%);
-  --cyber-light: hsl(217 13% 17%);
-  --cyber-yellow: hsl(51 100% 50%);
-  --cyber-green: hsl(80 100% 50%);
-  --cyber-blue: hsl(195 100% 50%);
-  --cyber-red: hsl(16 100% 50%);
-  --cyber-text: hsl(213 31% 96%);
-  --cyber-muted: hsl(218 11% 65%);
+  --cyber-bg: hsl(240 10% 3.9%);
+  --cyber-dark: hsl(240 6% 8%);
+  --cyber-light: hsl(240 5% 15%);
+  --cyber-yellow: hsl(51 84% 72%);
+  --cyber-green: hsl(80 60% 60%);
+  --cyber-blue: hsl(195 75% 65%);
+  --cyber-red: hsl(16 80% 65%);
+  --cyber-text: hsl(0 0% 95%);
+  --cyber-muted: hsl(240 5% 64%);
 
   --font-pixel: "Press Start 2P", cursive;
   --font-inter: "Inter", sans-serif;

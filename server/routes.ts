@@ -70,7 +70,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Award XP for progress
       if (progressData.completedLessons) {
         const course = await storage.getCourse(courseId);
-        if (course) {
+        if (course && course.xpPerLesson) {
           const xpGain = course.xpPerLesson * progressData.completedLessons;
           await storage.updateUserStats(userId, xpGain);
         }
@@ -193,7 +193,7 @@ async function initializeDefaultData() {
       ];
 
       for (const badge of badges) {
-        await storage.createBadge?.(badge);
+        await storage.createBadge(badge);
       }
     }
   } catch (error) {
