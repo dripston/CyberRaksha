@@ -33,35 +33,110 @@ Your mission: Master the art of digital payments while avoiding the traps set by
 
 Understanding these methods is crucial for safe digital transactions.`,
 
+    howToSolve: `🎯 **How to Complete This Exercise:**
+
+1. **Click on each category** to reveal available payment methods
+2. **Select the correct option** for each category:
+   - 📱 **QR Code**: Look for scanning patterns or QR references
+   - 🆔 **UPI ID**: Look for format like name@bank (contains @ symbol)
+   - 📞 **Phone Number**: Look for mobile numbers (10 digits, +91 prefix)
+
+3. **Watch the colors**: 
+   - ✅ Green = Correct placement
+   - ❌ Red = Wrong category
+
+4. **Complete all categories** to unlock the next lesson!
+
+💡 **Pro Tip**: Each payment method has unique characteristics. Study them carefully!`,
+
     exercise: {
-      type: 'drag-drop',
+      type: 'mcq-categorization',
       title: 'Identify Payment Methods',
-      instruction: 'Drag each payment method to its correct category:',
+      instruction: 'Click each category to see options and select the correct payment method:',
       items: [
-        { id: 'qr-1', text: '📱 Scan this pattern', type: 'QR Code' },
-        { id: 'id-1', text: 'rahul@paytm', type: 'UPI ID' },
-        { id: 'phone-1', text: '+91 98765 43210', type: 'Phone Number' },
-        { id: 'qr-2', text: 'Black & white squares pattern', type: 'QR Code' },
-        { id: 'id-2', text: 'priya@ybl', type: 'UPI ID' },
-        { id: 'phone-2', text: '9876543210', type: 'Phone Number' }
+        { 
+          id: 'qr-1', 
+          text: '📱 Scan this pattern', 
+          type: 'QR Code',
+          visual: '📷'
+        },
+        { 
+          id: 'id-1', 
+          text: 'rahul@paytm', 
+          type: 'UPI ID',
+          visual: '@'
+        },
+        { 
+          id: 'phone-1', 
+          text: '+91 98765 43210', 
+          type: 'Phone Number',
+          visual: '📞'
+        },
+        { 
+          id: 'qr-2', 
+          text: '⬛⬜⬛⬜⬛', 
+          type: 'QR Code',
+          visual: '🔲'
+        },
+        { 
+          id: 'id-2', 
+          text: 'priya@ybl', 
+          type: 'UPI ID',
+          visual: '@'
+        },
+        { 
+          id: 'phone-2', 
+          text: '9876543210', 
+          type: 'Phone Number',
+          visual: '📱'
+        }
       ],
       categories: ['QR Code', 'UPI ID', 'Phone Number']
     }
   }
 };
 
+// Add proper TypeScript interfaces for your data
+interface LessonItem {
+  id: string;
+  text: string;
+  type: string;
+  visual: string;
+}
+
+interface LessonExercise {
+  type: string;
+  title: string;
+  instruction: string;
+  items: LessonItem[];
+  categories: string[];
+}
+
+interface Lesson {
+  id: string;
+  title: string;
+  story: string;
+  concept: string;
+  howToSolve: string;
+  exercise: LessonExercise;
+}
+
+// Update your component with proper TypeScript types
+// Replace the existing exercise implementation with a multiple-choice approach
 export default function CoursePage() {
-  const [, params] = useRoute('/course/:courseId/:lessonId?');
+  // Keep existing imports and interfaces
+  
+  const [, params] = useRoute<{ courseId: string; lessonId?: string }>('/course/:courseId/:lessonId?');
   const { profile } = useAuth();
-  const [selectedItems, setSelectedItems] = useState<{[key: string]: string[]}>({
+  const [selectedItems, setSelectedItems] = useState<Record<string, string[]>>({
     'QR Code': [],
     'UPI ID': [],
     'Phone Number': []
   });
-  const [draggedItem, setDraggedItem] = useState<any>(null);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [draggedOver, setDraggedOver] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [currentSelection, setCurrentSelection] = useState<LessonItem | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const courseId = params?.courseId;
   const lessonId = params?.lessonId || 'lesson-1';
@@ -72,77 +147,72 @@ export default function CoursePage() {
     enabled: !!courseId,
   });
 
-  const currentLesson = lessonsData[lessonId as keyof typeof lessonsData];
+  const currentLesson = lessonsData[lessonId as keyof typeof lessonsData] as Lesson;
 
+  // Check if all items are correctly placed
   useEffect(() => {
-    // Check if exercise is completed correctly
-    if (currentLesson?.exercise.type === 'drag-drop') {
-      const isCorrect = currentLesson.exercise.categories.every(category => {
-        const correctItems = currentLesson.exercise.items
-          .filter(item => item.type === category)
-          .map(item => item.id);
-        const userItems = selectedItems[category] || [];
-        return correctItems.length === userItems.length && 
-               correctItems.every(id => userItems.includes(id));
+    const allItems = currentLesson?.exercise.items || [];
+    const allAssigned = Object.values(selectedItems).flat();
+    
+    if (allAssigned.length === allItems.length) {
+      const allCorrect = Object.entries(selectedItems).every(([category, itemIds]) => {
+        return itemIds.every(itemId => {
+          const item = allItems.find(i => i.id === itemId);
+          return item?.type === category;
+        });
       });
       
-      if (isCorrect && !isCompleted) {
+      if (allCorrect && !isCompleted) {
         setIsCompleted(true);
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
-      } else if (!isCorrect) {
-        setIsCompleted(false);
       }
     }
   }, [selectedItems, currentLesson, isCompleted]);
 
-  const handleDragStart = (e: React.DragEvent, item: any) => {
-    setDraggedItem(item);
-    e.dataTransfer.effectAllowed = 'move';
+  // Function to handle category click (show options)
+  const handleCategoryClick = (category: string) => {
+    setActiveCategory(activeCategory === category ? null : category);
   };
 
-  const handleDrop = (e: React.DragEvent, category: string) => {
-    e.preventDefault();
-    setDraggedOver(null);
-    if (draggedItem) {
-      // Remove item from all categories first
-      const newSelected = { ...selectedItems };
-      Object.keys(newSelected).forEach(cat => {
-        newSelected[cat] = newSelected[cat].filter(id => id !== draggedItem.id);
-      });
-      
-      // Add to new category
-      newSelected[category] = [...newSelected[category], draggedItem.id];
-      setSelectedItems(newSelected);
-      setDraggedItem(null);
-    }
+  // Function to handle option selection within a category
+  const handleOptionSelect = (item: LessonItem, category: string) => {
+    // Create a new copy of the selected items
+    const newSelected = { ...selectedItems };
+    
+    // Remove the item from any category it might be in
+    Object.keys(newSelected).forEach(cat => {
+      newSelected[cat] = newSelected[cat].filter(id => id !== item.id);
+    });
+    
+    // Add the item to the selected category
+    newSelected[category] = [...(newSelected[category] || []), item.id];
+    
+    // Update state
+    setSelectedItems(newSelected);
+    setActiveCategory(null); // Close the options after selection
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
+  // Helper functions
+  const getItemsInCategory = (category: string): LessonItem[] => {
+    return (selectedItems[category] || [])
+      .map(id => currentLesson?.exercise.items.find(item => item.id === id))
+      .filter((item): item is LessonItem => !!item);
   };
 
-  const handleDragEnter = (category: string) => {
-    setDraggedOver(category);
-  };
-
-  const handleDragLeave = () => {
-    setDraggedOver(null);
-  };
-
-  const getItemsInCategory = (category: string) => {
-    return selectedItems[category]?.map(id => 
-      currentLesson?.exercise.items.find(item => item.id === id)
-    ).filter(Boolean) || [];
-  };
-
-  const getUnassignedItems = () => {
+  const getUnassignedItems = (): LessonItem[] => {
     const assignedIds = Object.values(selectedItems).flat();
     return currentLesson?.exercise.items.filter(item => 
       !assignedIds.includes(item.id)
     ) || [];
   };
 
+  // Get available options for a category (unassigned items)
+  const getAvailableOptions = (): LessonItem[] => {
+    return getUnassignedItems();
+  };
+
+  // Early return for loading state
   if (!course || !currentLesson) {
     return (
       <div className="min-h-screen bg-cyber-bg flex items-center justify-center">
@@ -153,6 +223,38 @@ export default function CoursePage() {
 
   return (
     <div className="min-h-screen bg-cyber-bg text-cyber-text">
+      {/* Simplified CSS */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        /* Simple scrollbar styling */
+        .scrollable-content::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        .scrollable-content::-webkit-scrollbar-track {
+          background: #2a2a2a;
+          border-radius: 4px;
+        }
+        
+        .scrollable-content::-webkit-scrollbar-thumb {
+          background: #00ffaa;
+          border-radius: 4px;
+        }
+        
+        .scrollable-content::-webkit-scrollbar-thumb:hover {
+          background: #00ffaadd;
+        }
+        
+        /* Interactive elements */
+        .interactive-button {
+          transition: all 0.2s ease;
+          cursor: pointer;
+        }
+        
+        .interactive-button:hover {
+          transform: translateY(-1px);
+        }
+      `}} />
+
       {/* Header */}
       <div className="border-b border-cyber-light bg-cyber-dark">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -189,41 +291,56 @@ export default function CoursePage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-200px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* Left Panel - Story & Concept */}
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="cyber-card p-8 overflow-y-auto"
+            className="bg-cyber-dark/50 rounded-xl border border-cyber-light/30 p-8"
           >
-            <div className="flex items-center space-x-3 mb-6">
-              <BookOpen className="text-cyber-accent" size={24} />
-              <h2 className="font-mono text-xl font-bold text-cyber-accent">
+            <div className="flex items-center space-x-3 mb-8">
+              <BookOpen className="text-cyber-accent" size={28} />
+              <h2 className="font-mono text-2xl font-bold text-cyber-accent">
                 {currentLesson.title}
               </h2>
             </div>
 
-            {/* Story Section */}
-            <div className="mb-8">
-              <h3 className="font-mono text-lg font-semibold text-cyber-neon mb-4">
-                📖 Story
-              </h3>
-              <div className="bg-cyber-bg p-6 rounded-lg border border-cyber-light">
-                <p className="text-cyber-text leading-relaxed whitespace-pre-line">
-                  {currentLesson.story}
-                </p>
+            {/* Scrollable content area */}
+            <div className="h-[calc(100vh-260px)] overflow-y-auto scrollable-content space-y-6 pr-2">
+              {/* Story Section */}
+              <div>
+                <h3 className="font-mono text-base font-medium text-cyber-neon mb-3">
+                  📖 Story
+                </h3>
+                <div className="bg-cyber-bg/70 p-4 rounded-lg border border-cyber-light/50 min-h-[180px]">
+                  <p className="text-cyber-text leading-normal whitespace-pre-line text-xs">
+                    {currentLesson.story}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            {/* Concept Section */}
-            <div>
-              <h3 className="font-mono text-lg font-semibold text-cyber-orange mb-4">
-                💡 Concept
-              </h3>
-              <div className="bg-cyber-bg p-6 rounded-lg border border-cyber-light">
-                <div className="text-cyber-text leading-relaxed whitespace-pre-line">
-                  {currentLesson.concept}
+              {/* Concept Section */}
+              <div>
+                <h3 className="font-mono text-base font-medium text-cyber-orange mb-3">
+                  💡 Concept
+                </h3>
+                <div className="bg-cyber-bg/70 p-4 rounded-lg border border-cyber-light/50 min-h-[200px]">
+                  <div className="text-cyber-text leading-normal whitespace-pre-line text-xs">
+                    {currentLesson.concept}
+                  </div>
+                </div>
+              </div>
+
+              {/* How to Solve Section */}
+              <div>
+                <h3 className="font-mono text-base font-medium text-cyber-accent mb-3">
+                  🔧 How to Solve
+                </h3>
+                <div className="bg-gradient-to-br from-cyber-primary/10 to-cyber-accent/10 p-4 rounded-lg border border-cyber-accent/50 min-h-[180px]">
+                  <div className="text-cyber-text leading-normal whitespace-pre-line text-xs">
+                    {currentLesson.howToSolve}
+                  </div>
                 </div>
               </div>
             </div>
@@ -233,170 +350,211 @@ export default function CoursePage() {
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="cyber-card p-8 overflow-y-auto"
+            className="bg-cyber-dark/50 rounded-xl border border-cyber-light/30 p-8"
           >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-mono text-xl font-bold text-cyber-accent">
-                🎯 {currentLesson.exercise.title}
+            {/* Compact Header */}
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="text-2xl">🎯</div>
+              <h2 className="font-mono text-lg font-bold text-cyber-accent">
+                {currentLesson.exercise.title}
               </h2>
               {isCompleted && (
-                <div className="flex items-center space-x-2 text-cyber-neon">
-                  <CheckCircle size={20} />
-                  <span className="font-mono text-sm">Completed!</span>
+                <div className="flex items-center space-x-2 text-cyber-neon ml-auto">
+                  <CheckCircle size={18} />
+                  <span className="font-mono text-sm">Done!</span>
                 </div>
               )}
             </div>
 
-            <p className="text-cyber-muted mb-6">
-              {currentLesson.exercise.instruction}
-            </p>
-
-            {/* Drag & Drop Exercise */}
-            <div className="space-y-6">
-              {/* Unassigned Items Pool */}
-              <div className="bg-cyber-bg p-4 rounded-lg border border-cyber-light">
-                <h4 className="font-mono text-sm font-medium text-cyber-accent mb-3">
-                  Payment Methods to Categorize:
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {getUnassignedItems().map((item) => (
-                    <div
-                      key={item.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, item)}
-                      className="bg-cyber-dark px-4 py-2 rounded-lg border border-cyber-light cursor-move hover:border-cyber-accent transition-colors font-mono text-sm"
-                    >
-                      {item.text}
-                    </div>
-                  ))}
-                </div>
+            {/* Exercise Content - MUCH more scrollable space with instruction inside */}
+            <div className="h-[calc(100vh-220px)] overflow-y-auto scrollable-content space-y-4 pr-2">
+              
+              {/* Instruction section - now inside scrollable area */}
+              <div className="bg-cyber-primary/10 p-3 rounded-lg border border-cyber-primary/30 mb-4">
+                <p className="text-cyber-text font-mono text-xs mb-1">
+                  Click categories to see options, then select the correct payment method.
+                </p>
+                {activeCategory && (
+                  <p className="text-cyber-accent text-xs font-mono animate-pulse">
+                    👆 Choose for "{activeCategory}"
+                  </p>
+                )}
               </div>
-
-              {/* Drop Categories */}
-              {currentLesson.exercise.categories.map((category) => {
-                const isActive = draggedOver === category;
-                const hasCorrectItems = getItemsInCategory(category).every(item => 
-                  item && currentLesson.exercise.items.find(i => i.id === item.id)?.type === category
-                );
-                const categoryIcon = category === 'QR Code' ? '📱' : category === 'UPI ID' ? '🆔' : '📞';
-                
-                return (
-                  <div
-                    key={category}
-                    onDrop={(e) => handleDrop(e, category)}
-                    onDragOver={handleDragOver}
-                    onDragEnter={() => handleDragEnter(category)}
-                    onDragLeave={handleDragLeave}
-                    className={`p-4 rounded-lg border-2 border-dashed transition-all min-h-[120px] ${
-                      isActive 
-                        ? 'border-cyber-accent bg-cyber-accent/10 scale-105' 
-                        : hasCorrectItems && getItemsInCategory(category).length > 0
-                        ? 'border-cyber-neon bg-cyber-neon/5'
-                        : 'border-cyber-light bg-cyber-bg hover:border-cyber-accent'
-                    }`}
-                  >
-                    <h4 className="font-mono text-sm font-medium text-cyber-neon mb-3 flex items-center space-x-2">
-                      <span>{categoryIcon}</span>
-                      <span>{category}</span>
-                      {hasCorrectItems && getItemsInCategory(category).length > 0 && (
-                        <CheckCircle size={16} className="text-cyber-neon" />
-                      )}
-                    </h4>
-                    <div className="space-y-2">
-                      {getItemsInCategory(category).map((item) => {
-                        const isCorrect = item && currentLesson.exercise.items.find(i => i.id === item.id)?.type === category;
-                        return (
-                          <div
-                            key={item?.id}
-                            className={`px-4 py-2 rounded border font-mono text-sm transition-colors ${
-                              isCorrect 
-                                ? 'bg-cyber-neon/10 border-cyber-neon text-cyber-neon' 
-                                : 'bg-red-500/10 border-red-500 text-red-400'
-                            }`}
-                          >
-                            {item?.text}
+                {currentLesson.exercise.categories.map((category) => {
+                  const hasCorrectItems = getItemsInCategory(category).every(item => 
+                    item && currentLesson.exercise.items.find(i => i.id === item.id)?.type === category
+                  );
+                  const categoryIcon = category === 'QR Code' ? '📱' : category === 'UPI ID' ? '🆔' : '📞';
+                  const isActive = activeCategory === category;
+                  const hasItems = getItemsInCategory(category).length > 0;
+                  
+                  return (
+                    <div key={category} className="category-container space-y-3">
+                      {/* Category Header */}
+                      <button
+                        type="button"
+                        onClick={() => handleCategoryClick(category)}
+                        className={`interactive-button w-full text-left p-10 rounded-xl border-2 transition-all ${
+                          isActive
+                            ? 'border-cyber-accent bg-cyber-accent/10' 
+                            : hasItems
+                            ? 'border-cyber-neon bg-cyber-neon/5'
+                            : 'border-cyber-light bg-cyber-bg hover:border-cyber-primary'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <span className="text-4xl">{categoryIcon}</span>
+                            <div>
+                              <h4 className="font-mono text-xl font-bold text-cyber-neon">
+                                {category}
+                              </h4>
+                              <p className="text-base text-cyber-muted mt-1">
+                                {hasItems ? `${getItemsInCategory(category).length} item(s) selected` : 'Click to select payment method'}
+                              </p>
+                            </div>
                           </div>
-                        );
-                      })}
-                      {getItemsInCategory(category).length === 0 && (
-                        <div className="text-cyber-muted text-sm italic text-center py-4">
-                          Drop {category.toLowerCase()} items here
+                          <div className="flex items-center space-x-3">
+                            {hasItems && (
+                              <CheckCircle size={24} className="text-cyber-neon" />
+                            )}
+                            <span className={`text-cyber-muted transition-transform text-xl ${
+                              isActive ? 'rotate-180' : ''
+                            }`}>▼</span>
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* Selected Items Display */}
+                      {hasItems && (
+                        <div className="ml-8 space-y-3">
+                          {getItemsInCategory(category).map((item) => {
+                            const isCorrect = item && currentLesson.exercise.items.find(i => i.id === item.id)?.type === category;
+                            return (
+                              <div
+                                key={item?.id}
+                                className={`px-6 py-4 rounded-xl border-2 font-mono text-base flex items-center space-x-4 ${
+                                  isCorrect 
+                                    ? 'bg-cyber-neon/10 border-cyber-neon text-cyber-neon shadow-lg' 
+                                    : 'bg-red-500/10 border-red-500 text-red-400'
+                                }`}
+                              >
+                                <span className="text-2xl">{item?.visual}</span>
+                                <span className="flex-1">{item?.text}</span>
+                                {isCorrect && (
+                                  <CheckCircle size={20} className="text-cyber-neon" />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* MCQ Options - Show when category is active - Compact 2x2 grid */}
+                      {isActive && getAvailableOptions().length > 0 && (
+                        <div className="mcq-options ml-8 bg-cyber-dark/70 p-4 rounded-lg border border-cyber-primary/50">
+                          <h5 className="font-mono text-sm font-medium text-cyber-accent mb-3">
+                            🎯 Select correct {category.toLowerCase()}:
+                          </h5>
+                          <div className="grid grid-cols-2 gap-2">
+                            {getAvailableOptions().map((item) => (
+                              <button
+                                key={item.id}
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOptionSelect(item, category);
+                                }}
+                                className="interactive-button text-center bg-cyber-bg px-3 py-3 rounded-lg border border-cyber-light hover:border-cyber-accent hover:bg-cyber-accent/10 transition-all font-mono text-sm flex flex-col items-center space-y-1"
+                              >
+                                <span className="text-xl">{item.visual}</span>
+                                <span className="text-xs leading-tight">{item.text}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Show completion message when no options available */}
+                      {isActive && getAvailableOptions().length === 0 && (
+                        <div className="ml-8 bg-cyber-neon/15 p-6 rounded-xl border-2 border-cyber-neon/50">
+                          <p className="text-cyber-neon font-mono text-lg text-center font-bold">
+                            ✅ All payment methods have been categorized!
+                          </p>
                         </div>
                       )}
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Navigation */}
-            <div className="flex justify-between items-center mt-8 pt-6 border-t border-cyber-light">
-              <button 
-                className="flex items-center space-x-2 px-4 py-2 text-cyber-muted hover:text-cyber-text transition-colors"
-                onClick={() => window.history.back()}
-              >
-                <ArrowLeft size={16} />
-                <span className="font-mono">Back to Course</span>
-              </button>
-              
-              <button 
-                disabled={!isCompleted}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-mono transition-colors ${
-                  isCompleted 
-                    ? 'modern-button' 
-                    : 'bg-cyber-light text-cyber-muted cursor-not-allowed'
-                }`}
-              >
-                <span>Next Lesson</span>
-                <ArrowRight size={16} />
-              </button>
-            </div>
-
-            {/* Progress Indicator */}
-            <div className="mt-4 text-center">
-              <div className="inline-flex items-center space-x-2 px-4 py-2 bg-cyber-bg rounded-lg border border-cyber-light">
-                <div className="w-2 h-2 bg-cyber-neon rounded-full"></div>
-                <span className="font-mono text-xs text-cyber-muted">Lesson 1 of {course.totalLessons}</span>
-              </div>
+                  );
+                })}
             </div>
           </motion.div>
         </div>
-      </div>
+        
+        {/* Navigation - Outside panels, at bottom */}
+        <div className="max-w-7xl mx-auto px-6 mt-8">
+          <div className="flex justify-between items-center py-6 border-t border-cyber-light">
+            <button 
+              className="flex items-center space-x-2 px-6 py-3 bg-cyber-dark rounded-lg border border-cyber-light hover:border-cyber-accent transition-colors"
+              onClick={() => window.history.back()}
+            >
+              <ArrowLeft size={20} />
+              <span className="font-mono text-base">Back to Course</span>
+            </button>
+            
+            <div className="flex items-center space-x-2 px-4 py-2 bg-cyber-bg rounded-lg border border-cyber-light">
+              <div className="w-3 h-3 bg-cyber-neon rounded-full"></div>
+              <span className="font-mono text-sm text-cyber-muted">Lesson 1 of {course.totalLessons}</span>
+            </div>
+            
+            <button 
+              disabled={!isCompleted}
+              className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-mono transition-colors ${
+                isCompleted 
+                  ? 'bg-cyber-accent text-cyber-dark hover:bg-cyber-neon' 
+                  : 'bg-cyber-light text-cyber-muted cursor-not-allowed'
+              }`}
+            >
+              <span>Next Lesson</span>
+              <ArrowRight size={20} />
+            </button>
+          </div>
+        </div>
 
-      {/* Success Animation Overlay */}
-      {showSuccess && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
-        >
+        {/* Success Animation Overlay */}
+        {showSuccess && (
           <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="bg-cyber-dark border border-cyber-neon rounded-2xl p-8 text-center max-w-md mx-4"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
           >
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1, rotate: 360 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-cyber-neon to-cyber-accent rounded-full flex items-center justify-center"
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="bg-cyber-dark border border-cyber-neon rounded-2xl p-8 text-center max-w-md mx-4"
             >
-              <CheckCircle size={32} className="text-cyber-bg" />
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1, rotate: 360 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-cyber-neon to-cyber-accent rounded-full flex items-center justify-center"
+              >
+                <CheckCircle size={32} className="text-cyber-bg" />
+              </motion.div>
+              <h3 className="font-mono text-xl font-bold text-cyber-neon mb-2">
+                🎉 Exercise Completed!
+              </h3>
+              <p className="text-cyber-text mb-4">
+                Great job! You've mastered UPI payment methods.
+              </p>
+              <div className="flex items-center justify-center space-x-2 text-cyber-accent">
+                <Zap size={20} />
+                <span className="font-mono font-bold">+{course.xpPerLesson} XP Earned!</span>
+              </div>
             </motion.div>
-            <h3 className="font-mono text-xl font-bold text-cyber-neon mb-2">
-              🎉 Exercise Completed!
-            </h3>
-            <p className="text-cyber-text mb-4">
-              Great job! You've mastered UPI payment methods.
-            </p>
-            <div className="flex items-center justify-center space-x-2 text-cyber-accent">
-              <Zap size={20} />
-              <span className="font-mono font-bold">+{course.xpPerLesson} XP Earned!</span>
-            </div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

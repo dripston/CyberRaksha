@@ -198,6 +198,34 @@
     box-shadow: 0 8px 25px hsl(280 100% 70% / 0.4);
   }
   
+  /* Drag and Drop Utilities */
+  .draggable-item {
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  
+  .draggable-item:active {
+    cursor: grabbing;
+  }
+  
+  .draggable-item.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+  }
+  
+  .drop-zone {
+    transition: all 0.2s ease;
+  }
+  
+  .drop-zone.drag-over {
+    background-color: hsl(180 100% 50% / 0.1);
+    border-color: hsl(180 100% 50%);
+    transform: scale(1.02);
+  }
+  
   .level-indicator {
     background: linear-gradient(45deg, var(--cyber-primary), var(--cyber-pink));
     border: 2px solid var(--cyber-secondary);
