@@ -16,6 +16,8 @@
       "dest": "dist/public/$1"
     }
   ],
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist/public"
+  "buildCommand": "npm install && npm run build",
+  "outputDirectory": "dist/public",
+  "installCommand": "npm install",
+  "framework": null
 }
