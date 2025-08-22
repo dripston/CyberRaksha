@@ -1,5 +1,5 @@
 {
-  "name": "rest-express",
+  "name": "cyber-raksha",
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
@@ -105,11 +105,11 @@
     "type": "git",
     "url": "git+https://github.com/dripston/CyberRaksha.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["cybersecurity", "education", "gamification", "react", "typescript", "firebase", "learning-platform"],
+  "author": "dripston",
   "bugs": {
     "url": "https://github.com/dripston/CyberRaksha/issues"
   },
-  "homepage": "https://github.com/dripston/CyberRaksha#readme",
-  "description": ""
+  "homepage": "https://cyber-raksha-alpha.vercel.app",
+  "description": "A gamified cyber safety learning platform with interactive courses and progress tracking"
 }
