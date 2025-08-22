@@ -28,7 +28,7 @@ export default function ProfileSetup() {
   const [profession, setProfession] = useState("");
   const [selectedAvatar, setSelectedAvatar] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { user, completeProfileSetup, createProfile } = useAuth();
+  const { user, updateProfile } = useAuth();
 
   // Pre-fill form with Firebase user data if available
   useEffect(() => {
@@ -52,18 +52,19 @@ export default function ProfileSetup() {
     try {
       if (user) {
         // Complete profile setup for authenticated user
-        await completeProfileSetup({
+        await updateProfile({
           username,
           profession,
           avatar: selectedAvatar,
+          xp: 0,
+          level: 1,
+          streak: 0,
+          rank: "Bronze"
         });
       } else {
-        // Legacy fallback for non-authenticated users
-        await createProfile({
-          username,
-          profession,
-          avatar: selectedAvatar,
-        });
+        // Redirect to login if not authenticated
+        window.location.href = "/";
+        return;
       }
       
       // Simulate loading for better UX

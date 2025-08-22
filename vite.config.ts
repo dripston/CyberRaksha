@@ -1,21 +1,36 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-export default defineConfig({
-  plugins: [
-    react(),
-    runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
-          ),
-        ]
-      : []),
-  ],
+// Dynamically import Replit plugins only in development and when available
+const loadReplitPlugins = async () => {
+  if (process.env.NODE_ENV === "production" || !process.env.REPL_ID) {
+    return [];
+  }
+  
+  try {
+    const [runtimeErrorOverlay, cartographer] = await Promise.all([
+      import("@replit/vite-plugin-runtime-error-modal").catch(() => null),
+      import("@replit/vite-plugin-cartographer").catch(() => null),
+    ]);
+    
+    const plugins = [];
+    if (runtimeErrorOverlay) plugins.push(runtimeErrorOverlay.default());
+    if (cartographer) plugins.push(cartographer.cartographer());
+    return plugins;
+  } catch {
+    return [];
+  }
+};
+
+export default defineConfig(async () => {
+  const replitPlugins = await loadReplitPlugins();
+  
+  return {
+    plugins: [
+      react(),
+      ...replitPlugins,
+    ],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -38,4 +53,5 @@ export default defineConfig({
       'Cross-Origin-Embedder-Policy': 'unsafe-none'
     },
   },
+  };
 });
