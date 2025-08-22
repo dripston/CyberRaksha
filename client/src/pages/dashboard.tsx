@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
@@ -11,16 +11,101 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Course, UserProgress, Badge } from "@shared/schema";
 
-interface DashboardData {
-  courses: Course[];
-  userProgress: (UserProgress & { course: Course })[];
-  userBadges: any[];
-  leaderboard: any[];
-}
+// Mock courses data - UPI Payments as the first course
+const mockCourses: Course[] = [
+  {
+    id: "upi-payments-course",
+    title: "Safe UPI Payments",
+    description: "Master the art of secure digital payments in India's UPI ecosystem. Learn to identify payment methods and avoid cyber traps.",
+    difficulty: "beginner",
+    totalLessons: 8,
+    estimatedDuration: 45,
+    category: "digital-payments",
+    thumbnail: "/images/upi-payments.jpg",
+    isActive: true,
+    xpPerLesson: 50,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: "password-security-course",
+    title: "Password Security Fundamentals",
+    description: "Learn the basics of creating and managing secure passwords to protect your digital identity.",
+    difficulty: "beginner",
+    totalLessons: 8,
+    estimatedDuration: 45,
+    category: "authentication",
+    thumbnail: "/images/password-security.jpg",
+    isActive: true,
+    xpPerLesson: 50,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: "phishing-detection-course", 
+    title: "Phishing Detection & Prevention",
+    description: "Master the skills to identify and avoid phishing attacks across email, web, and social platforms.",
+    difficulty: "intermediate",
+    totalLessons: 12,
+    estimatedDuration: 90,
+    category: "social-engineering",
+    thumbnail: "/images/phishing-detection.jpg",
+    isActive: true,
+    xpPerLesson: 75,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: "safe-browsing-course",
+    title: "Safe Internet Browsing",
+    description: "Discover best practices for secure web browsing and protecting your privacy online.",
+    difficulty: "beginner",
+    totalLessons: 6,
+    estimatedDuration: 30,
+    category: "web-security",
+    thumbnail: "/images/safe-browsing.jpg",
+    isActive: true,
+    xpPerLesson: 40,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: "social-media-privacy-course",
+    title: "Social Media Privacy",
+    description: "Learn to configure privacy settings and protect your personal information on social platforms.",
+    difficulty: "beginner",
+    totalLessons: 10,
+    estimatedDuration: 60,
+    category: "privacy",
+    thumbnail: "/images/social-media-privacy.jpg",
+    isActive: true,
+    xpPerLesson: 60,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: "advanced-threats-course",
+    title: "Advanced Threat Detection",
+    description: "Deep dive into identifying sophisticated cyber threats and advanced persistent attacks.",
+    difficulty: "advanced",
+    totalLessons: 15,
+    estimatedDuration: 120,
+    category: "threat-detection",
+    thumbnail: "/images/threat-detection.jpg",
+    isActive: true,
+    xpPerLesson: 100,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+];
 
 export default function Dashboard() {
   const { toast } = useToast();
   const { profile, isLoading } = useAuth();
+
+  // Use frontend courses instead of API call
+  const courses = useMemo(() => mockCourses, []);
+  const coursesLoading = false; // No longer loading from API
 
   // Redirect to profile setup if no profile
   useEffect(() => {
@@ -36,12 +121,6 @@ export default function Dashboard() {
       return;
     }
   }, [profile, isLoading, toast]);
-
-  const { data: courses = [], isLoading: coursesLoading } = useQuery<Course[]>({
-    queryKey: ["/api/courses"],
-    enabled: !!profile,
-    retry: false,
-  });
 
   const { data: userProgress = [], isLoading: progressLoading } = useQuery<(UserProgress & { course: Course })[]>({
     queryKey: ["/api/user/progress"],
@@ -159,30 +238,18 @@ export default function Dashboard() {
                 </span>
               </div>
               
-              {coursesLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="cyber-card p-6 animate-pulse">
-                      <div className="h-4 bg-cyber-light rounded mb-4"></div>
-                      <div className="h-3 bg-cyber-light rounded mb-2"></div>
-                      <div className="h-3 bg-cyber-light rounded w-2/3"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {courses.map((course) => (
-                    <CourseCard
-                      key={course.id}
-                      course={course}
-                      progress={getProgressForCourse(course.id)}
-                      onProgressUpdate={() => {
-                        // Handle progress update
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {courses.map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    course={course}
+                    progress={getProgressForCourse(course.id)}
+                    onProgressUpdate={() => {
+                      // Handle progress update
+                    }}
+                  />
+                ))}
+              </div>
             </motion.div>
 
             {/* Badges Section */}
