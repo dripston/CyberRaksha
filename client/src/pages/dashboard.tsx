@@ -111,7 +111,7 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <div className="hidden md:block">
-                  <div className="w-20 h-20 bg-cyber-primary rounded-2xl flex items-center justify-center animate-pulse-slow">
+                  <div className="w-20 h-20 bg-gradient-to-br from-cyber-primary via-cyber-accent to-cyber-neon rounded-2xl flex items-center justify-center animate-pulse-slow">
                     <span className="text-3xl">🎮</span>
                   </div>
                 </div>
@@ -120,7 +120,7 @@ export default function Dashboard() {
               {/* XP Progress Bar */}
               <div className="mb-6">
                 <div className="flex justify-between items-center mb-3">
-                  <span className="font-mono text-sm text-cyber-primary font-medium">
+                  <span className="font-mono text-sm text-cyber-accent font-medium">
                     XP Progress to Level {(user?.level || 1) + 1}
                   </span>
                   <span className="text-base text-cyber-muted font-medium">
@@ -138,7 +138,7 @@ export default function Dashboard() {
             <div className="mb-12">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="font-mono text-xl text-cyber-secondary font-bold">Active Courses</h2>
-                <button className="text-base text-cyber-primary hover:text-cyber-accent transition-colors font-medium">
+                <button className="text-base text-cyber-accent hover:text-cyber-neon transition-colors font-medium">
                   View All Courses →
                 </button>
               </div>

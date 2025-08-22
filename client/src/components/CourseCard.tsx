@@ -7,15 +7,15 @@ interface CourseCardProps {
 }
 
 const difficultyColors = {
-  Beginner: "cyber-primary",
-  Intermediate: "cyber-accent", 
-  Advanced: "cyber-muted-blue",
+  Beginner: "cyber-neon",
+  Intermediate: "cyber-orange", 
+  Advanced: "cyber-pink",
 };
 
 const difficultyGradients = {
-  Beginner: "from-cyber-primary to-cyber-accent",
-  Intermediate: "from-cyber-accent to-cyber-primary",
-  Advanced: "from-cyber-muted-blue to-cyber-primary",
+  Beginner: "from-cyber-primary to-cyber-neon",
+  Intermediate: "from-cyber-orange to-cyber-accent",
+  Advanced: "from-cyber-pink to-cyber-primary",
 };
 
 export default function CourseCard({ course, progress }: CourseCardProps) {
@@ -39,13 +39,13 @@ export default function CourseCard({ course, progress }: CourseCardProps) {
         <div className="mb-6">
           <div className="flex justify-between items-center mb-3">
             <span className="text-sm text-cyber-muted font-medium">Progress</span>
-            <span className="text-sm text-cyber-primary font-bold">{Math.round(progress)}%</span>
+            <span className="text-sm text-cyber-neon font-bold">{Math.round(progress)}%</span>
           </div>
           <ProgressBar progress={progress} />
         </div>
         
         <div className="flex justify-between items-center">
-          <span className="text-sm text-cyber-primary font-medium">+{course.xpPerLesson} XP per lesson</span>
+          <span className="text-sm text-cyber-accent font-medium">+{course.xpPerLesson} XP per lesson</span>
           <button 
             className="modern-button px-4 py-2 rounded-lg font-mono text-sm"
             data-testid={`button-course-${progress > 0 ? 'continue' : 'start'}-${course.id}`}

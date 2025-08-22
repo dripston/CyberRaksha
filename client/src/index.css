@@ -25,15 +25,17 @@
   --ring: hsl(202.8169 89.1213% 53.1373%);
 
   /* Cyber theme colors */
-  --cyber-bg: hsl(222 84% 4.9%);
-  --cyber-dark: hsl(222 47% 11%);
-  --cyber-light: hsl(217 32% 17%);
-  --cyber-primary: hsl(213 93% 67%);
-  --cyber-secondary: hsl(210 40% 98%);
-  --cyber-accent: hsl(221 83% 53%);
-  --cyber-muted-blue: hsl(215 28% 43%);
-  --cyber-text: hsl(210 40% 98%);
-  --cyber-muted: hsl(217 10% 64%);
+  --cyber-bg: hsl(240 15% 4%);
+  --cyber-dark: hsl(240 12% 8%);
+  --cyber-light: hsl(240 8% 15%);
+  --cyber-primary: hsl(280 100% 70%);
+  --cyber-secondary: hsl(0 0% 98%);
+  --cyber-accent: hsl(180 100% 50%);
+  --cyber-neon: hsl(120 100% 50%);
+  --cyber-orange: hsl(30 100% 60%);
+  --cyber-pink: hsl(320 100% 75%);
+  --cyber-text: hsl(0 0% 95%);
+  --cyber-muted: hsl(240 5% 65%);
 
   --font-mono: "JetBrains Mono", "Space Mono", monospace;
   --font-inter: "Inter", sans-serif;
@@ -71,6 +73,24 @@
     @apply font-inter antialiased bg-cyber-bg text-cyber-text;
     font-family: var(--font-inter);
     line-height: 1.6;
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 50%, hsl(280 100% 70% / 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsl(180 100% 50% / 0.06) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, hsl(120 100% 50% / 0.04) 0%, transparent 50%);
+    animation: backgroundPulse 10s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
   }
 
   html {
@@ -85,25 +105,48 @@
   }
   
   .cyber-card {
-    background: linear-gradient(135deg, var(--cyber-dark) 0%, hsl(222 47% 9%) 100%);
+    background: linear-gradient(135deg, var(--cyber-dark) 0%, hsl(240 12% 6%) 100%);
     border: 1px solid var(--cyber-light);
     border-radius: 16px;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
+    position: relative;
+  }
+  
+  .cyber-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--cyber-primary) 0%, var(--cyber-accent) 50%, var(--cyber-neon) 100%);
+    border-radius: 16px;
+    padding: 1px;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .cyber-card:hover::before {
+    opacity: 1;
   }
   
   .cyber-card:hover {
-    border-color: var(--cyber-primary);
-    box-shadow: 0 8px 32px hsl(213 93% 67% / 0.1);
     transform: translateY(-4px);
+    box-shadow: 0 20px 40px hsl(280 100% 70% / 0.15);
   }
   
   .progress-bar {
-    background: linear-gradient(90deg, var(--cyber-primary) 0%, var(--cyber-accent) 100%);
-    height: 6px;
+    background: linear-gradient(90deg, var(--cyber-primary) 0%, var(--cyber-accent) 50%, var(--cyber-neon) 100%);
+    height: 8px;
     border-radius: 8px;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 0 20px hsl(280 100% 70% / 0.3);
   }
   
   .progress-bar::after {
@@ -122,7 +165,7 @@
   }
   
   .modern-button {
-    background: var(--cyber-primary);
+    background: linear-gradient(135deg, var(--cyber-primary) 0%, var(--cyber-pink) 100%);
     border: none;
     color: var(--cyber-bg);
     font-weight: 600;
@@ -130,18 +173,62 @@
     border-radius: 8px;
     font-family: var(--font-mono);
     font-size: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .modern-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+  }
+  
+  .modern-button:hover::before {
+    left: 100%;
   }
   
   .modern-button:hover {
-    background: var(--cyber-accent);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px hsl(213 93% 67% / 0.2);
+    background: linear-gradient(135deg, var(--cyber-accent) 0%, var(--cyber-neon) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px hsl(280 100% 70% / 0.4);
   }
   
   .level-indicator {
-    background: var(--cyber-primary);
+    background: linear-gradient(45deg, var(--cyber-primary), var(--cyber-pink));
     border: 2px solid var(--cyber-secondary);
-    box-shadow: 0 0 12px hsl(213 93% 67% / 0.3);
+    box-shadow: 0 0 20px hsl(280 100% 70% / 0.6);
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  
+  @keyframes glow {
+    from { box-shadow: 0 0 20px hsl(280 100% 70% / 0.6); }
+    to { box-shadow: 0 0 30px hsl(280 100% 70% / 0.8), 0 0 40px hsl(180 100% 50% / 0.4); }
+  }
+  
+  @keyframes backgroundPulse {
+    0%, 100% { 
+      background: 
+        radial-gradient(circle at 20% 50%, hsl(280 100% 70% / 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, hsl(180 100% 50% / 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, hsl(120 100% 50% / 0.04) 0%, transparent 50%);
+    }
+    33% { 
+      background: 
+        radial-gradient(circle at 60% 30%, hsl(320 100% 75% / 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 10% 70%, hsl(180 100% 50% / 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 80% 10%, hsl(30 100% 60% / 0.04) 0%, transparent 50%);
+    }
+    66% { 
+      background: 
+        radial-gradient(circle at 30% 80%, hsl(280 100% 70% / 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 70% 40%, hsl(120 100% 50% / 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 20% 20%, hsl(180 100% 50% / 0.04) 0%, transparent 50%);
+    }
   }
 
   .font-mono {
