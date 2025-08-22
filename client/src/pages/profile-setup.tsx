@@ -133,7 +133,7 @@ export default function ProfileSetup() {
           border: '1px solid rgba(255, 255, 255, 0.1)',
           borderRadius: '16px',
           padding: '2rem',
-          backdropFilter: 'blur(10px)',
+          backdropFilter: 'blur(11px)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
         }}>
           <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
