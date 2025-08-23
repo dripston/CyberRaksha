@@ -556,14 +556,17 @@ export default function CoursePage() {
 
   // Track XP when lesson is completed
   const awardLessonXP = async () => {
-    if (!profile?.id) return;
+    if (!profile?.username) {
+      console.error('Profile or user not available for XP award');
+      return;
+    }
     
     try {
       const response = await fetch('/api/progress/update-xp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: profile.id,
+          userId: profile.username, // Use username as unique identifier
           courseId: courseId,
           lessonXP: course.xpPerLesson,
           lessonNumber: lessonNumber,
@@ -575,6 +578,9 @@ export default function CoursePage() {
       const result = await response.json();
       if (result.success) {
         console.log('🎆 XP Awarded:', result.xpGained, '| Total XP:', result.user.xp);
+        // Update the local profile with new XP
+        const updatedProfile = { ...profile, xp: result.user.xp };
+        localStorage.setItem('cyberRakshaProfile', JSON.stringify(updatedProfile));
       }
     } catch (error) {
       console.error('Error awarding XP:', error);
@@ -585,72 +591,56 @@ export default function CoursePage() {
   const checkAnswers = () => {
     console.log('🎯 Checking answers for lesson type:', currentLesson.exercise.type);
     
-    // Award XP and mark as completed
-    setIsCompleted(true);
-    setShowSuccess(true);
-    awardLessonXP();
-    setTimeout(() => setShowSuccess(false), 3000);
-    console.log('✅ Lesson completed - XP awarded!');
-    return;
+    let isCorrectAnswer = false;
     
     if (currentLesson.exercise.type === 'qr-validation') {
-      const selected = currentLesson.exercise.options.find(opt => opt.id === selectedOption);
+      const exercise = currentLesson.exercise as QRValidationExercise;
+      const selected = exercise.options.find(opt => opt.id === selectedOption);
       console.log('📍 QR Validation - Selected:', selectedOption, 'Is Correct:', selected?.isCorrect);
-      if (selected && selected.isCorrect) {
-        console.log('✅ QR Validation completed successfully!');
-        setIsCompleted(true);
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-      }
+      isCorrectAnswer = !!(selected && selected.isCorrect);
     } else if (currentLesson.exercise.type === 'phishing-detection') {
-      const allPhishing = currentLesson.exercise.messages
+      const exercise = currentLesson.exercise as PhishingDetectionExercise;
+      const allPhishing = exercise.messages
         .filter(msg => msg.isPhishing)
         .map(msg => msg.id);
       
-      const allCorrect = allPhishing.every(id => selectedMessages.includes(id)) &&
+      isCorrectAnswer = allPhishing.every(id => selectedMessages.includes(id)) &&
         selectedMessages.every(id => allPhishing.includes(id));
       
-      console.log('🎣 Phishing Detection - Expected phishing IDs:', allPhishing, 'Selected:', selectedMessages, 'All Correct:', allCorrect);
-      
-      if (allCorrect) {
-        console.log('✅ Phishing detection completed successfully!');
-        setIsCompleted(true);
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-      }
+      console.log('🎣 Phishing Detection - Expected phishing IDs:', allPhishing, 'Selected:', selectedMessages, 'All Correct:', isCorrectAnswer);
     } else if (currentLesson.exercise.type === 'pay-or-request') {
-      const allCorrect = currentLesson.exercise.scenarios.every(
+      const exercise = currentLesson.exercise as PayOrRequestExercise;
+      const allCorrect = exercise.scenarios.every(
         scenario => scenarioAnswers[scenario.id] === scenario.correctAnswer
       );
       
-      console.log('💰 Pay or Request - Answers:', scenarioAnswers, 'All Correct:', allCorrect, 'All Answered:', Object.keys(scenarioAnswers).length === currentLesson.exercise.scenarios.length);
+      isCorrectAnswer = allCorrect && Object.keys(scenarioAnswers).length === exercise.scenarios.length;
       
-      if (allCorrect && Object.keys(scenarioAnswers).length === currentLesson.exercise.scenarios.length) {
-        console.log('✅ Pay or Request completed successfully!');
-        setIsCompleted(true);
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-      }
+      console.log('💰 Pay or Request - Answers:', scenarioAnswers, 'All Correct:', allCorrect, 'All Answered:', Object.keys(scenarioAnswers).length === exercise.scenarios.length);
     } else if (currentLesson.exercise.type === 'split-payment') {
+      const exercise = currentLesson.exercise as SplitPaymentExercise;
       const amount = parseFloat(splitAmount);
-      console.log('🧮 Split Payment - Input:', splitAmount, 'Parsed:', amount, 'Expected:', currentLesson.exercise.correctAnswer);
-      if (amount === currentLesson.exercise.correctAnswer) {
-        console.log('✅ Split payment completed successfully!');
-        setIsCompleted(true);
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-      } else {
-        setSplitError(`Incorrect. Try again! Each person should pay ₹${currentLesson.exercise.correctAnswer}`);
+      console.log('🧮 Split Payment - Input:', splitAmount, 'Parsed:', amount, 'Expected:', exercise.correctAnswer);
+      isCorrectAnswer = amount === exercise.correctAnswer;
+      
+      if (!isCorrectAnswer) {
+        setSplitError(`Incorrect. Try again! Each person should pay ₹${exercise.correctAnswer}`);
+        return;
       }
     } else if (currentLesson.exercise.type === 'fraud-simulation') {
-      const selected = currentLesson.exercise.options.find(opt => opt.id === fraudAnswer);
+      const exercise = currentLesson.exercise as FraudSimulationExercise;
+      const selected = exercise.options.find(opt => opt.id === fraudAnswer);
       console.log('🚨 Fraud Simulation - Selected:', fraudAnswer, 'Is Correct:', selected?.isCorrect);
-      if (selected && selected.isCorrect) {
-        console.log('✅ Fraud simulation completed successfully!');
-        setIsCompleted(true);
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-      }
+      isCorrectAnswer = !!(selected && selected.isCorrect);
+    }
+    
+    // Award XP and mark as completed if answer is correct
+    if (isCorrectAnswer && !isCompleted) {
+      console.log('✅ Lesson completed - awarding XP!');
+      setIsCompleted(true);
+      setShowSuccess(true);
+      awardLessonXP();
+      setTimeout(() => setShowSuccess(false), 3000);
     }
   };
 
@@ -1355,7 +1345,10 @@ export default function CoursePage() {
                 <span className="font-mono font-bold">+{(course.xpPerLesson || 0) * (course.totalLessons || 0)} XP Earned!</span>
               </div>
               <button
-                onClick={() => setLocation('/dashboard')}
+                onClick={() => {
+                  // Force a full page refresh to ensure data is updated
+                  window.location.href = '/dashboard';
+                }}
                 className="px-6 py-3 bg-cyber-accent text-cyber-dark font-mono rounded-lg hover:bg-cyber-neon transition-colors"
               >
                 Return to Dashboard

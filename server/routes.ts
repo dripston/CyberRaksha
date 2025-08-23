@@ -41,15 +41,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid request data" });
       }
 
-      // Get current user
-      const [currentUser] = await db
+      // First try to find user by username (firstName field)
+      let [currentUser] = await db
         .select()
         .from(users)
-        .where(eq(users.id, userId))
+        .where(eq(users.firstName, userId))
         .limit(1);
 
+      // If user doesn't exist, create them
       if (!currentUser) {
-        return res.status(404).json({ error: "User not found" });
+        console.log('Creating new user:', userId);
+        const [newUser] = await db
+          .insert(users)
+          .values({
+            firstName: userId,
+            email: `${userId}@cyberraksha.local`,
+            xp: 0,
+            level: 1,
+            rank: "Bronze"
+          })
+          .returning();
+        currentUser = newUser;
       }
 
       // Start transaction
@@ -61,14 +73,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             xp: (currentUser.xp || 0) + lessonXP,
             updatedAt: new Date()
           })
-          .where(eq(users.id, userId));
+          .where(eq(users.id, currentUser.id));
 
         // Update or create user progress
         const existingProgress = await tx
           .select()
           .from(userProgress)
           .where(and(
-            eq(userProgress.userId, userId),
+            eq(userProgress.userId, currentUser.id),
             eq(userProgress.courseId, courseId)
           ))
           .limit(1);
@@ -86,7 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await tx
             .insert(userProgress)
             .values({
-              userId: userId,
+              userId: currentUser.id,
               courseId: courseId,
               completedLessons: lessonNumber,
               isCompleted: isCourseComplete || false,
@@ -99,7 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedUserData = await db
         .select()
         .from(users)
-        .where(eq(users.id, userId))
+        .where(eq(users.id, currentUser.id))
         .limit(1);
 
       res.json({ 
@@ -119,6 +131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const leaderboard = await db
         .select({
           id: users.id,
+          username: users.firstName, // Use firstName as username
           firstName: users.firstName,
           lastName: users.lastName,
           profileImageUrl: users.profileImageUrl,
