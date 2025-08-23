@@ -12,6 +12,19 @@ export interface Profile {
   rank: string;
 }
 
+// Function to refresh profile from localStorage
+export function refreshProfileFromStorage(): Profile | null {
+  try {
+    const profileData = localStorage.getItem('cyberRakshaProfile');
+    if (profileData) {
+      return JSON.parse(profileData);
+    }
+  } catch (error) {
+    console.error('Error parsing profile from localStorage:', error);
+  }
+  return null;
+}
+
 export function useAuth() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);

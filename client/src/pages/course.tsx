@@ -554,34 +554,48 @@ export default function CoursePage() {
     }
   }, [selectedItems, currentLesson, isCompleted]);
 
-  // Track XP when lesson is completed
+  // Track XP when lesson is completed (Frontend only)
   const awardLessonXP = async () => {
     if (!profile?.username) {
-      console.error('Profile or user not available for XP award');
+      console.error('Profile not available for XP award');
       return;
     }
     
     try {
-      const response = await fetch('/api/progress/update-xp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: profile.username, // Use username as unique identifier
-          courseId: courseId,
-          lessonXP: course.xpPerLesson,
-          lessonNumber: lessonNumber,
-          isLessonComplete: true,
-          isCourseComplete: isLastLesson
-        })
-      });
+      // Update XP directly in localStorage
+      const xpGained = course.xpPerLesson;
+      const newXP = (profile.xp || 0) + xpGained;
+      const newLevel = Math.floor(newXP / 500) + 1; // 500 XP per level
       
-      const result = await response.json();
-      if (result.success) {
-        console.log('🎆 XP Awarded:', result.xpGained, '| Total XP:', result.user.xp);
-        // Update the local profile with new XP
-        const updatedProfile = { ...profile, xp: result.user.xp };
-        localStorage.setItem('cyberRakshaProfile', JSON.stringify(updatedProfile));
-      }
+      // Calculate new rank based on XP
+      let newRank = profile.rank;
+      if (newXP >= 2000) newRank = "Diamond";
+      else if (newXP >= 1500) newRank = "Platinum";
+      else if (newXP >= 1000) newRank = "Gold";
+      else if (newXP >= 500) newRank = "Silver";
+      else newRank = "Bronze";
+      
+      const updatedProfile = { 
+        ...profile, 
+        xp: newXP,
+        level: newLevel,
+        rank: newRank
+      };
+      
+      // Save to localStorage
+      localStorage.setItem('cyberRakshaProfile', JSON.stringify(updatedProfile));
+      
+      // Save progress for this course
+      const progressKey = `course_progress_${courseId}`;
+      const courseProgress = {
+        courseId: courseId,
+        completedLessons: lessonNumber,
+        isCompleted: isLastLesson,
+        lastAccessedAt: new Date().toISOString()
+      };
+      localStorage.setItem(progressKey, JSON.stringify(courseProgress));
+      
+      console.log('🎆 XP Awarded:', xpGained, '| Total XP:', newXP, '| Level:', newLevel, '| Rank:', newRank);
     } catch (error) {
       console.error('Error awarding XP:', error);
     }

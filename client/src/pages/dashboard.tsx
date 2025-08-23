@@ -77,7 +77,20 @@ const mockCourses: Course[] = [
 
 export default function Dashboard() {
   const { toast } = useToast();
-  const { profile, isLoading } = useAuth();
+  const { profile: authProfile, isLoading } = useAuth();
+  
+  // Get fresh profile from localStorage on every render
+  const profile = useMemo(() => {
+    try {
+      const profileData = localStorage.getItem('cyberRakshaProfile');
+      if (profileData) {
+        return JSON.parse(profileData);
+      }
+    } catch (error) {
+      console.error('Error parsing profile from localStorage:', error);
+    }
+    return authProfile;
+  }, [authProfile]);
 
   // Use frontend courses instead of API call
   const courses = useMemo(() => mockCourses, []);
@@ -112,12 +125,36 @@ export default function Dashboard() {
     retry: false,
   });
 
-  const { data: leaderboard = [] } = useQuery<any[]>({
-    queryKey: ["/api/progress/leaderboard"],
-    queryFn: () => fetch('/api/progress/leaderboard').then(res => res.json()),
-    enabled: !!profile,
-    retry: false,
-  });
+  // Create frontend-only leaderboard that includes current user
+  const leaderboard = useMemo(() => {
+    const mockLeaderboard = [
+      { id: '1', username: 'Alice', xp: 1250, level: 3, rank: 'Silver', position: 1 },
+      { id: '2', username: 'Bob', xp: 875, level: 2, rank: 'Bronze', position: 2 },
+      { id: '3', username: 'Charlie', xp: 650, level: 2, rank: 'Bronze', position: 3 },
+    ];
+
+    if (profile?.username) {
+      // Add current user to leaderboard
+      const currentUser = {
+        id: profile.username,
+        username: profile.username,
+        xp: profile.xp || 0,
+        level: profile.level || 1,
+        rank: profile.rank || 'Bronze',
+        position: 0
+      };
+
+      // Remove existing entry if present and add updated one
+      const filteredBoard = mockLeaderboard.filter(user => user.username !== profile.username);
+      const fullBoard = [...filteredBoard, currentUser];
+      
+      // Sort by XP and assign positions
+      const sortedBoard = fullBoard.sort((a, b) => (b.xp || 0) - (a.xp || 0));
+      return sortedBoard.map((user, index) => ({ ...user, position: index + 1 }));
+    }
+
+    return mockLeaderboard;
+  }, [profile]);
 
   if (isLoading || !profile) {
     return (
@@ -128,6 +165,20 @@ export default function Dashboard() {
   }
 
   const getProgressForCourse = (courseId: string) => {
+    // Check localStorage for course progress first
+    try {
+      const progressKey = `course_progress_${courseId}`;
+      const savedProgress = localStorage.getItem(progressKey);
+      if (savedProgress) {
+        const progress = JSON.parse(savedProgress);
+        const course = courses.find(c => c.id === courseId);
+        return course ? ((progress.completedLessons || 0) / (course.totalLessons || 1)) * 100 : 0;
+      }
+    } catch (error) {
+      console.error('Error getting course progress:', error);
+    }
+    
+    // Fallback to API data
     const progress = userProgress.find((p) => p.courseId === courseId);
     return progress ? ((progress.completedLessons || 0) / (progress.course.totalLessons || 1)) * 100 : 0;
   };
@@ -254,29 +305,33 @@ export default function Dashboard() {
                 Leaderboard
               </h2>
               <div className="cyber-card p-6">
-                {leaderboard.length > 0 ? (
-                  <div className="space-y-4">
-                    {leaderboard.slice(0, 10).map((user, index) => (
-                      <div key={user.id} className="flex items-center justify-between p-3 rounded-lg bg-cyber-dark">
-                        <div className="flex items-center space-x-4">
-                          <span className={`text-lg font-mono font-bold ${
-                            index === 0 ? 'text-yellow-400' : 
-                            index === 1 ? 'text-gray-300' : 
-                            index === 2 ? 'text-amber-600' : 'text-cyber-accent'
-                          }`}>
-                            #{index + 1}
-                          </span>
-                          <span className="text-cyber-text font-mono">{user.username || 'Anonymous'}</span>
-                        </div>
-                        <span className="text-cyber-neon font-mono">{user.xp || 0} XP</span>
+                <div className="space-y-4">
+                  {leaderboard.slice(0, 10).map((user, index) => (
+                    <div key={user.id} className={`flex items-center justify-between p-3 rounded-lg ${
+                      user.username === profile?.username ? 'bg-cyber-accent/20 border border-cyber-accent' : 'bg-cyber-dark'
+                    }`}>
+                      <div className="flex items-center space-x-4">
+                        <span className={`text-lg font-mono font-bold ${
+                          index === 0 ? 'text-yellow-400' : 
+                          index === 1 ? 'text-gray-300' : 
+                          index === 2 ? 'text-amber-600' : 'text-cyber-accent'
+                        }`}>
+                          #{user.position}
+                        </span>
+                        <span className={`font-mono ${
+                          user.username === profile?.username ? 'text-cyber-accent font-bold' : 'text-cyber-text'
+                        }`}>
+                          {user.username}
+                          {user.username === profile?.username && ' (You)'}
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-cyber-muted text-center py-8">
-                    No leaderboard data available yet. Be the first to earn XP!
-                  </p>
-                )}
+                      <div className="flex items-center space-x-2">
+                        <span className="text-cyber-muted text-sm font-mono">{user.rank}</span>
+                        <span className="text-cyber-neon font-mono">{user.xp} XP</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </motion.div>
           </div>
