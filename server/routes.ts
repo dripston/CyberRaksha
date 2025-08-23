@@ -264,9 +264,11 @@ async function initializeDefaultData() {
   try {
     // Check if the specific course exists in database
     const existingCourses = await db.select().from(courses);
-    console.log('Existing courses in DB:', existingCourses.length);
+    console.log('Existing courses in DB:', existingCourses.map(c => c.id));
     
-    if (existingCourses.length === 0) {
+    // Check if the specific course we need exists
+    const upiCourse = existingCourses.find(c => c.id === 'upi-payments-course');
+    if (!upiCourse) {
       console.log('Creating default courses...');
       // Create the specific course that the frontend expects
       await db.insert(courses).values({
