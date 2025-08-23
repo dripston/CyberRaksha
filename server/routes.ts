@@ -262,78 +262,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 async function initializeDefaultData() {
   try {
-    // Check if courses already exist
-    const existingCourses = await storage.getCourses();
+    // Check if the specific course exists in database
+    const existingCourses = await db.select().from(courses);
+    console.log('Existing courses in DB:', existingCourses.length);
+    
     if (existingCourses.length === 0) {
-      // Create default courses
-      await storage.createCourse({
+      console.log('Creating default courses...');
+      // Create the specific course that the frontend expects
+      await db.insert(courses).values({
+        id: "upi-payments-course", // Match frontend expected ID
         title: "Safe UPI Payments",
-        description: "Learn secure digital payment practices and fraud prevention.",
-        difficulty: "Beginner",
-        xpPerLesson: 25,
-        totalLessons: 5,
-        icon: "🏦🔒",
-      });
-
-      await storage.createCourse({
-        title: "Spot the Phishing Scam",
-        description: "Identify and avoid email scams and fraudulent messages.",
-        difficulty: "Intermediate",
-        xpPerLesson: 40,
+        description: "Master the art of secure digital payments in India's UPI ecosystem.",
+        difficulty: "beginner",
+        xpPerLesson: 50,
         totalLessons: 6,
-        icon: "📧⚠️",
+        icon: "🎯",
       });
 
-      await storage.createCourse({
-        title: "Social Media Safety",
-        description: "Master privacy settings and secure social networking.",
-        difficulty: "Advanced",
-        xpPerLesson: 60,
-        totalLessons: 7,
-        icon: "📱🛡️",
-      });
+      // Create additional courses
+      await db.insert(courses).values([
+        {
+          id: "password-security-course",
+          title: "Password Security Fundamentals",
+          description: "Learn the basics of creating and managing secure passwords.",
+          difficulty: "beginner",
+          xpPerLesson: 50,
+          totalLessons: 8,
+          icon: "🔒",
+        },
+        {
+          id: "phishing-detection-course",
+          title: "Phishing Detection & Prevention", 
+          description: "Master the skills to identify and avoid phishing attacks.",
+          difficulty: "intermediate",
+          xpPerLesson: 75,
+          totalLessons: 12,
+          icon: "🎣",
+        }
+      ]);
+      
+      console.log('✅ Default courses created successfully');
     }
 
     // Check if badges already exist
-    const existingBadges = await storage.getBadges();
+    const existingBadges = await db.select().from(badges);
     if (existingBadges.length === 0) {
+      console.log('Creating default badges...');
       // Create default badges
-      const badges = [
+      await db.insert(badges).values([
         {
-          name: "First Login",
+          id: "first-steps",
+          name: "First Steps",
           description: "Welcome to CyberRaksha!",
           icon: "⭐",
           color: "cyber-yellow",
         },
         {
-          name: "Cyber Guardian",
-          description: "Completed your first course",
-          icon: "🛡️",
+          id: "xp-warrior",
+          name: "XP Warrior",
+          description: "Earned 200+ XP",
+          icon: "⚡",
           color: "cyber-blue",
         },
         {
-          name: "Quiz Master",
-          description: "Scored 100% on 5 quizzes",
-          icon: "🔥",
-          color: "cyber-red",
-        },
-        {
-          name: "Streak Warrior",
-          description: "Maintained a 7-day learning streak",
-          icon: "⚡",
+          id: "cyber-guardian",
+          name: "Cyber Guardian",
+          description: "Earned 500+ XP",
+          icon: "🛡️",
           color: "cyber-green",
         },
         {
-          name: "Knowledge Seeker",
-          description: "Completed 3 different courses",
-          icon: "📚",
-          color: "cyber-yellow",
+          id: "course-master",
+          name: "Course Master",
+          description: "Completed your first course",
+          icon: "🔥",
+          color: "cyber-red",
         },
-      ];
-
-      for (const badge of badges) {
-        await storage.createBadge(badge);
-      }
+      ]);
+      console.log('✅ Default badges created successfully');
     }
   } catch (error) {
     console.error("Error initializing default data:", error);

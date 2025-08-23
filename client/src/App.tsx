@@ -31,6 +31,7 @@ function Router() {
       {user && profile ? (
         <>
           <Route path="/" component={Dashboard} />
+          <Route path="/dashboard" component={Dashboard} />
           <Route path="/course/:courseId/:lessonId?" component={CoursePage} />
         </>
       ) : (
