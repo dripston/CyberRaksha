@@ -11,7 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Course, UserProgress, Badge } from "@shared/schema";
 
-// Mock courses data - UPI Payments as the first course
+// Mock courses data - All 6 courses
 const mockCourses: Course[] = [
   {
     id: "upi-payments-course",
@@ -28,49 +28,49 @@ const mockCourses: Course[] = [
     title: "Password Security Fundamentals",
     description: "Learn the basics of creating and managing secure passwords to protect your digital identity.",
     difficulty: "beginner",
-    totalLessons: 8,
+    totalLessons: 5,
     xpPerLesson: 50,
     icon: "🔒",
     createdAt: new Date()
   },
   {
-    id: "phishing-detection-course", 
-    title: "Phishing Detection & Prevention",
-    description: "Master the skills to identify and avoid phishing attacks across email, web, and social platforms.",
-    difficulty: "intermediate",
-    totalLessons: 12,
-    xpPerLesson: 75,
-    icon: "🎣",
-    createdAt: new Date()
-  },
-  {
-    id: "safe-browsing-course",
-    title: "Safe Internet Browsing",
-    description: "Discover best practices for secure web browsing and protecting your privacy online.",
+    id: "social-media-safety-course",
+    title: "Social Media Safety",
+    description: "Navigate social media platforms safely and protect your privacy online.",
     difficulty: "beginner",
-    totalLessons: 6,
-    xpPerLesson: 40,
-    icon: "🌐",
+    totalLessons: 5,
+    xpPerLesson: 50,
+    icon: "📱",
     createdAt: new Date()
   },
   {
-    id: "social-media-privacy-course",
-    title: "Social Media Privacy",
-    description: "Learn to configure privacy settings and protect your personal information on social platforms.",
+    id: "email-security-course",
+    title: "Email Security",
+    description: "Master email security to avoid phishing attacks and protect sensitive information.",
     difficulty: "beginner",
-    totalLessons: 10,
-    xpPerLesson: 60,
-    icon: "🔒",
+    totalLessons: 5,
+    xpPerLesson: 50,
+    icon: "📧",
     createdAt: new Date()
   },
   {
-    id: "advanced-threats-course",
-    title: "Advanced Threat Detection",
-    description: "Deep dive into identifying sophisticated cyber threats and advanced persistent attacks.",
-    difficulty: "advanced",
-    totalLessons: 15,
-    xpPerLesson: 100,
-    icon: "⚠️",
+    id: "public-wifi-security-course",
+    title: "Public WiFi Security",
+    description: "Stay safe when using public WiFi networks and protect your data.",
+    difficulty: "beginner",
+    totalLessons: 5,
+    xpPerLesson: 50,
+    icon: "📶",
+    createdAt: new Date()
+  },
+  {
+    id: "mobile-device-security-course",
+    title: "Mobile Device Security",
+    description: "Secure your mobile devices and protect your data on the go.",
+    difficulty: "beginner",
+    totalLessons: 5,
+    xpPerLesson: 50,
+    icon: "📱",
     createdAt: new Date()
   }
 ];
@@ -111,19 +111,13 @@ export default function Dashboard() {
     }
   }, [profile, isLoading, toast]);
 
-  const { data: userProgress = [], isLoading: progressLoading } = useQuery<(UserProgress & { course: Course })[]>({
-    queryKey: ["/api/user/progress", profile?.id],
-    queryFn: () => fetch(`/api/user/progress?userId=${profile?.id}`).then(res => res.json()),
-    enabled: !!profile?.id,
-    retry: false,
-  });
+  // Remove backend API call - only use localStorage
+  const userProgress: (UserProgress & { course: Course })[] = [];
+  const progressLoading = false;
 
-  const { data: userBadges = [], isLoading: badgesLoading } = useQuery<any[]>({
-    queryKey: ["/api/user/badges", profile?.id],
-    queryFn: () => fetch(`/api/user/badges?userId=${profile?.id}`).then(res => res.json()),
-    enabled: !!profile?.id,
-    retry: false,
-  });
+  // Remove backend API call - only use localStorage
+  const userBadges: any[] = [];
+  const badgesLoading = false;
 
   // Create frontend-only leaderboard that includes current user
   const leaderboard = useMemo(() => {
@@ -165,7 +159,7 @@ export default function Dashboard() {
   }
 
   const getProgressForCourse = (courseId: string) => {
-    // Check localStorage for course progress first
+    // Only use localStorage for course progress
     try {
       const progressKey = `course_progress_${courseId}`;
       const savedProgress = localStorage.getItem(progressKey);
@@ -178,9 +172,8 @@ export default function Dashboard() {
       console.error('Error getting course progress:', error);
     }
     
-    // Fallback to API data
-    const progress = userProgress.find((p) => p.courseId === courseId);
-    return progress ? ((progress.completedLessons || 0) / (progress.course.totalLessons || 1)) * 100 : 0;
+    // Return 0 if no progress found in localStorage
+    return 0;
   };
 
   const nextLevelXP = (profile?.level || 1) * 500;
