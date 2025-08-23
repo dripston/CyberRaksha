@@ -13,5 +13,8 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Clean the DATABASE_URL by removing quotes if present
+const databaseUrl = process.env.DATABASE_URL.replace(/^["']|["']$/g, '');
+
+export const pool = new Pool({ connectionString: databaseUrl });
 export const db = drizzle({ client: pool, schema });
