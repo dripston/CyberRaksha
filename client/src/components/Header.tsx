@@ -27,8 +27,11 @@ export default function Header({ profile }: HeaderProps) {
           
           {/* Navigation */}
           <nav className="hidden md:flex space-x-10">
-            <a href="#" className="text-cyber-secondary hover:text-cyber-accent transition-colors font-medium text-base">
+            <a href="/dashboard" className="text-cyber-secondary hover:text-cyber-accent transition-colors font-medium text-base">
               Dashboard
+            </a>
+            <a href="/personalization" className="text-cyber-muted hover:text-cyber-neon transition-colors font-medium text-base">
+              Personalization
             </a>
             <a href="#" className="text-cyber-muted hover:text-cyber-neon transition-colors font-medium text-base">
               Courses

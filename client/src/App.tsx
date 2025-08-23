@@ -8,6 +8,7 @@ import Landing from "@/pages/landing";
 import ProfileSetup from "@/pages/profile-setup";
 import Dashboard from "@/pages/dashboard";
 import CoursePage from "@/pages/course";
+import Personalization from "@/pages/personalization";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -32,6 +33,7 @@ function Router() {
         <>
           <Route path="/" component={Dashboard} />
           <Route path="/dashboard" component={Dashboard} />
+          <Route path="/personalization" component={Personalization} />
           <Route path="/course/:courseId/:lessonId?" component={CoursePage} />
         </>
       ) : (
