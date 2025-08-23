@@ -7,7 +7,6 @@ import CourseCard from "@/components/CourseCard";
 import ProgressBar from "@/components/ProgressBar";
 import BadgeDisplay from "@/components/BadgeDisplay";
 import QuickActions from "@/components/QuickActions";
-import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Course, UserProgress, Badge } from "@shared/schema";
 
@@ -79,17 +78,37 @@ export default function Dashboard() {
   const { toast } = useToast();
   const { profile: authProfile, isLoading } = useAuth();
   
-  // Get fresh profile from localStorage on every render
+  // Get fresh profile from localStorage on every render and add 300 XP
   const profile = useMemo(() => {
     try {
       const profileData = localStorage.getItem('cyberRakshaProfile');
       if (profileData) {
-        return JSON.parse(profileData);
+        const parsedProfile = JSON.parse(profileData);
+        // Update XP and level
+        const updatedXP = (parsedProfile.xp || 0) + 300;
+        const updatedLevel = Math.floor(updatedXP / 500) + 1;
+        const updatedRank = updatedXP >= 1500 ? 'Silver' : updatedXP >= 500 ? 'Bronze' : 'Basic';
+        
+        const updatedProfile = {
+          ...parsedProfile,
+          xp: updatedXP,
+          level: updatedLevel,
+          rank: updatedRank
+        };
+        
+        // Save updated profile to localStorage
+        localStorage.setItem('cyberRakshaProfile', JSON.stringify(updatedProfile));
+        return updatedProfile;
       }
     } catch (error) {
       console.error('Error parsing profile from localStorage:', error);
     }
-    return authProfile;
+    return authProfile ? {
+      ...authProfile,
+      xp: (authProfile.xp || 0) + 300,
+      level: Math.floor(((authProfile.xp || 0) + 300) / 500) + 1,
+      rank: ((authProfile.xp || 0) + 300) >= 1500 ? 'Silver' : ((authProfile.xp || 0) + 300) >= 500 ? 'Bronze' : 'Basic'
+    } : null;
   }, [authProfile]);
 
   // Use frontend courses instead of API call
@@ -119,7 +138,7 @@ export default function Dashboard() {
   const userBadges: any[] = [];
   const badgesLoading = false;
 
-  // Create frontend-only leaderboard that includes current user
+  // Create frontend-only leaderboard that includes current user with updated XP
   const leaderboard = useMemo(() => {
     const mockLeaderboard = [
       { id: '1', username: 'Alice', xp: 1250, level: 3, rank: 'Silver', position: 1 },
@@ -128,7 +147,7 @@ export default function Dashboard() {
     ];
 
     if (profile?.username) {
-      // Add current user to leaderboard
+      // Add current user to leaderboard with updated XP
       const currentUser = {
         id: profile.username,
         username: profile.username,
