@@ -135,8 +135,8 @@ export default function Personalization() {
             Select Your Demographic
           </h2>
           
-          {/* Simple Radio Button Selection - Hackathon Quick Fix */}
-          <div className="space-y-4 mb-8">
+          {/* Horizontal Radio Button Selection */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="flex items-center p-4 bg-cyber-dark rounded-lg border border-cyber-muted">
               <input 
                 type="radio" 

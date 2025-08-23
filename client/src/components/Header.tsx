@@ -56,11 +56,11 @@ export default function Header({ profile }: HeaderProps) {
             </div>
             <button 
               onClick={handleLogout}
-              className="w-10 h-10 bg-cyber-light rounded-lg border border-cyber-muted hover:border-cyber-primary transition-colors flex items-center justify-center"
+              className="px-4 py-2 bg-cyber-dark rounded-lg border border-cyber-pink hover:bg-cyber-pink/20 hover:border-cyber-pink transition-all flex items-center space-x-2"
               data-testid="button-logout"
-              title="Logout"
             >
               <span className="text-sm">🚪</span>
+              <span className="font-mono text-cyber-pink font-medium">Logout</span>
             </button>
           </div>
         </div>

@@ -9,6 +9,7 @@ import ProfileSetup from "@/pages/profile-setup";
 import Dashboard from "@/pages/dashboard";
 import CoursePage from "@/pages/course";
 import Personalization from "@/pages/personalization";
+import ThreatIntelligence from "@/pages/threat-intelligence";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -41,6 +42,7 @@ function Router() {
           <Route path="/" component={Landing} />
         </>
       )}
+      <Route path="/threat-intelligence" component={ThreatIntelligence} />
       <Route component={NotFound} />
     </Switch>
   );

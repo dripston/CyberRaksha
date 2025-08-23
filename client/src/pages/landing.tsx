@@ -130,6 +130,30 @@ export default function Landing() {
                   🚀
                 </motion.div>
               </button>
+
+              {/* Threat Intelligence Link */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.0, duration: 0.6 }}
+                className="mt-6"
+              >
+                <a
+                  href="/threat-intelligence"
+                  className="group inline-flex items-center text-cyber-muted hover:text-cyber-accent transition-colors duration-300 font-mono text-lg"
+                >
+                  <span className="border-b border-transparent group-hover:border-cyber-accent transition-colors duration-300">
+                    🔍 View Live Threat Intelligence Feed
+                  </span>
+                  <motion.div
+                    className="ml-2 text-sm"
+                    animate={{ x: [0, 3, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    →
+                  </motion.div>
+                </a>
+              </motion.div>
             </motion.div>
 
             {/* Features Grid */}
